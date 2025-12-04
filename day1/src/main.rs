@@ -18,6 +18,9 @@ impl Dial {
 }
 impl Instruction {
     fn from_str(s: &str) -> Option<Instruction> {
+        if s.len() < 2 {
+            return None;
+        }
         let (dir, mag_str) = s.split_at(1);
         let magnitude: i32 = mag_str.parse().ok()?;
         let distance = match dir {
