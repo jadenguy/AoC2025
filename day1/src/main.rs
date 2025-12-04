@@ -116,6 +116,63 @@ mod tests {
         let instructions = super::parse_instructions(&lines);
         let dial = super::Dial { position: 50 };
         let zero_count = super::count_zero_positions(instructions, dial);
-        assert_eq!(zero_count, 3); // Adjust this expected value if needed
+        assert_eq!(zero_count, 3);
+    }
+
+    #[test]
+    fn test_count_zero_positions_no_zero() {
+        let data = vec!["R1", "R2", "R3"];
+        let lines: Vec<String> = data.iter().map(|s| s.to_string()).collect();
+        let instructions = super::parse_instructions(&lines);
+        let dial = super::Dial { position: 50 };
+        let zero_count = super::count_zero_positions(instructions, dial);
+        assert_eq!(zero_count, 0);
+    }
+    
+    #[test]
+    fn test_count_zero_positions_start_at_zero() {
+        let data = vec!["R10", "L10"];
+        let lines: Vec<String> = data.iter().map(|s| s.to_string()).collect();
+        let instructions = super::parse_instructions(&lines);
+        let dial = super::Dial { position: 0 };
+        let zero_count = super::count_zero_positions(instructions, dial);
+        assert_eq!(zero_count, 2);
+    }
+    
+    #[test]
+    fn test_count_zero_positions_multiple_zeros() {
+        let data = vec!["R100", "L100", "R100"];
+        let lines: Vec<String> = data.iter().map(|s| s.to_string()).collect();
+        let instructions = super::parse_instructions(&lines);
+        let dial = super::Dial { position: 0 };
+        let zero_count = super::count_zero_positions(instructions, dial);
+        assert_eq!(zero_count, 4);
+    }
+    
+    #[test]
+    fn test_parse_instructions_filters_invalid() {
+        let data = vec!["L10", "X20", "R5", "Lxx", ""];
+        let lines: Vec<String> = data.iter().map(|s| s.to_string()).collect();
+        let instructions = super::parse_instructions(&lines);
+        assert_eq!(instructions.len(), 2);
+        assert_eq!(instructions[0].distance, -10);
+        assert_eq!(instructions[1].distance, 5);
+    }
+    
+    #[test]
+    fn test_apply_instruction_negative_wrap() {
+        let dial = super::Dial { position: 2 };
+        let instr = super::Instruction { distance: -5 };
+        let new_dial = dial.apply_instruction(&instr);
+        assert_eq!(new_dial.position, 97);
+    }
+    
+    #[test]
+    fn test_apply_instruction_large_positive_wrap() {
+        let dial = super::Dial { position: 99 };
+        let instr = super::Instruction { distance: 101 };
+        let new_dial = dial.apply_instruction(&instr);
+        assert_eq!(new_dial.position, 0);
     }
 }
+
