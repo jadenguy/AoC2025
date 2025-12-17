@@ -1,5 +1,3 @@
-use std::fs::File;
-use std::io::{self, BufRead, BufReader};
 pub struct Instruction {
     pub distance: i32,
 }
@@ -55,11 +53,6 @@ impl Instruction {
         format!("{}{}", direction, inst.distance.abs())
     }
 }
-pub fn read_lines(filename: &str) -> io::Result<Vec<String>> {
-    let file = File::open(filename)?;
-    let reader = BufReader::new(file);
-    reader.lines().collect()
-}
 pub fn parse_instructions(lines: &Vec<String>) -> Vec<Instruction> {
     lines
         .iter()
@@ -69,26 +62,35 @@ pub fn parse_instructions(lines: &Vec<String>) -> Vec<Instruction> {
 fn get_results_after_instructions(
     dial: Dial,
     instructions: Vec<Instruction>,
+    verbose: bool,
 ) -> Vec<DialPositionUpdate> {
     let mut results = Vec::new();
     let mut current_dial = dial;
     let mut running_total_clicks = 0;
-    println!("The dial starts by pointing at {}.", current_dial.position);
+    if verbose {
+        println!("The dial starts by pointing at {}.", current_dial.position);
+    }
     for instruction in instructions {
         let update = current_dial.apply_instruction_and_listen(&instruction);
-        print!(
-            "The dial is rotated {} to point at {}; ",
-            Instruction::to_str(&instruction),
-            update.dial.position
-        );
-        if update.clicks > 0 {
+        if verbose {
             print!(
-                "during this rotation, it points at zero {} times; ",
-                update.clicks
+                "The dial is rotated {} to point at {}; ",
+                Instruction::to_str(&instruction),
+                update.dial.position
             );
+        }
+        if update.clicks > 0 {
+            if verbose {
+                print!(
+                    "during this rotation, it points at zero {} times; ",
+                    update.clicks
+                );
+            }
             running_total_clicks += update.clicks;
         }
-        println!("the running total is {}.", running_total_clicks);
+        if verbose {
+            println!("the running total is {}.", running_total_clicks);
+        }
         current_dial = Dial {
             position: update.dial.position,
         };
@@ -99,9 +101,16 @@ fn get_results_after_instructions(
 
 pub fn apply_and_count_zeroes_clicks_and_final(
     instructions: Vec<Instruction>,
-    dial: Dial,
+    dial_initial_position: i32,
+    verbose: bool,
 ) -> (i32, i32, Dial) {
-    let results = get_results_after_instructions(dial, instructions);
+    let results = get_results_after_instructions(
+        Dial {
+            position: dial_initial_position,
+        },
+        instructions,
+        verbose,
+    );
     let total_zero_dials: i32 = results
         .iter()
         .filter(|update| update.dial.position == 0)
