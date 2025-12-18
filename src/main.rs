@@ -54,9 +54,19 @@ fn run_day1() {
 }
 
 fn run_day2() {
-    let _lines = read_lines("./data/day2/part1.txt").expect("Failed to read lines from file");
-
-    println!("Running day 2 logic");
+    use aoc2025::day2::find_invalid_ids_lexicographically;
+    let lines = read_lines("./data/day2/part1.txt").expect("Failed to read lines from file");
+    let invalid_ids = lines
+        .first()
+        .unwrap()
+        .split(',')
+        .map(|l| {
+            find_invalid_ids_lexicographically(l, true)
+                .iter()
+                .sum::<u64>()
+        })
+        .sum::<u64>();
+    println!("Day 2 Part 1: {}", invalid_ids)
 }
 
 fn run_day3() {
