@@ -63,6 +63,9 @@ pub fn find_invalid_ids(range: (u64, u64)) -> Vec<u64> {
     return results;
 }
 pub fn find_invalid_ids_lexicographically(range: &str, verbose: bool) -> Vec<u64> {
+    if verbose {
+        println!("{} check", range);
+    }
     let (first, last) = range.trim().split_once("-").unwrap();
     let x = lexicographical_lower_bound(first, verbose);
     let y = lexicographical_upper_bound(last, verbose);
@@ -85,31 +88,41 @@ fn lexicographical_lower_bound(num_str: &str, verbose: bool) -> u64 {
     let (high, low) = num_str.split_at(num_str.len() / 2);
     if high.len() < low.len() {
         if verbose {
-            println!("default low digits {}", low.len() / 2);
+            println!("default low digits {}", 4 * (low.len() / 2));
         }
         return (String::from("1") + &"0".repeat(low.len() / 2))
             .parse::<u64>()
             .unwrap();
+    }else {
+        if verbose {
+            println!("found high digits {}", low.len() * 2);
+        }
     }
     let higher = high.parse::<u64>().unwrap();
     let lower = low.parse::<u64>().unwrap();
-    if higher>=lower{return higher;}
-higher+1
+    if higher >= lower {
+        return higher;
+    }
+    higher + 1
 }
 fn lexicographical_upper_bound(num_str: &str, verbose: bool) -> u64 {
     let (high, low) = num_str.split_at(num_str.len() / 2);
     if high.len() < low.len() {
         if verbose {
-            println!("default high digits {}", low.len() / 2);
+            println!("default high digits {}", 4 * (low.len() / 2));
         }
         return ("9".repeat(low.len() / 2))
             .parse::<u64>()
             .unwrap_or_default();
+    } else {
+        if verbose {
+            println!("found high digits {}", low.len() * 2);
+        }
     }
     let higher = high.parse::<u64>().unwrap();
     let lower = low.parse::<u64>().unwrap();
-if higher<=lower{
-return    higher
-;}
-higher-1
+    if higher <= lower {
+        return higher;
+    }
+    higher - 1
 }
