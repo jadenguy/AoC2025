@@ -93,8 +93,8 @@ fn lexicographical_lower_bound(num_str: &str, verbose: bool) -> u64 {
     }
     let higher = high.parse::<u64>().unwrap();
     let lower = low.parse::<u64>().unwrap();
-    if higher>lower{return higher-1;}
-higher
+    if higher>=lower{return higher;}
+higher+1
 }
 fn lexicographical_upper_bound(num_str: &str, verbose: bool) -> u64 {
     let (high, low) = num_str.split_at(num_str.len() / 2);
@@ -108,8 +108,8 @@ fn lexicographical_upper_bound(num_str: &str, verbose: bool) -> u64 {
     }
     let higher = high.parse::<u64>().unwrap();
     let lower = low.parse::<u64>().unwrap();
-if higher<lower{
-return    higher+1
+if higher<=lower{
+return    higher
 ;}
-higher
+higher-1
 }
