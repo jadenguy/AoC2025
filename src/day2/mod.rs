@@ -46,10 +46,10 @@ pub fn find_invalid_ids(range: (u64, u64)) -> Vec<u64> {
         highest_invalid_id_half -= 1;
     }
     highest_invalid_id = highest_invalid_id_half * upper_half_domain + highest_invalid_id_half;
-    println!("{} domain to {}", low_pow, upper_half_domain);
-    println!("{} value to {}", lowest_invalid_id, highest_invalid_id);
+    print!("{} domain to {}", low_pow, upper_half_domain);
+    print!("{} value to {}", lowest_invalid_id, highest_invalid_id);
     if lowest_invalid_id > highest_invalid_id {
-        println!("invalid");
+        print!("invalid");
         return results;
     }
     // let domains: u32 = (lower_bound..=upper_bound)
@@ -64,65 +64,84 @@ pub fn find_invalid_ids(range: (u64, u64)) -> Vec<u64> {
 }
 pub fn find_invalid_ids_lexicographically(range: &str, verbose: bool) -> Vec<u64> {
     if verbose {
-        println!("{} check", range);
+        print!("{} check; ", range);
     }
     let (first, last) = range.trim().split_once("-").unwrap();
-    let x = lexicographical_lower_bound(first, verbose);
-    let y = lexicographical_upper_bound(last, verbose);
-
-    let result = (x..=y)
+    let start_dup_range = lexicographical_lower_bound(first, verbose);
+    let end_dup_range = lexicographical_upper_bound(last, verbose);
+    if end_dup_range < start_dup_range {
+        if verbose {
+            println!("{} has no invalid ids", range)
+        }
+        return vec![];
+    }
+    let result: Vec<u64> = (start_dup_range..=end_dup_range)
         .map(|i| format!("{}{}", i, i).parse::<u64>().unwrap())
         .collect();
-    if verbose {
+    if verbose && !result.is_empty() {
         print!("{} has invalid IDs ", range);
         for v in &result {
             print!(",{}", v)
         }
-        println!();
     }
-
+    println!();
     result
 }
 
 fn lexicographical_lower_bound(num_str: &str, verbose: bool) -> u64 {
     let (high, low) = num_str.split_at(num_str.len() / 2);
     if high.len() < low.len() {
+        let n = high.len();
+        let var_name = "0";
+        let repeat = var_name.repeat(n);
+        let result = (String::from("1") + &repeat).parse::<u64>().unwrap();
         if verbose {
-            println!("default low digits {}", 4 * (low.len() / 2));
+            print!(
+                "range has too few starting digits at {}, running {}{}; ",
+                num_str.len(),
+                result,
+                result,
+            );
         }
-        return (String::from("1") + &"0".repeat(low.len() / 2))
-            .parse::<u64>()
-            .unwrap();
-    }else {
-        if verbose {
-            println!("found high digits {}", low.len() * 2);
-        }
+        return result;
     }
-    let higher = high.parse::<u64>().unwrap();
     let lower = low.parse::<u64>().unwrap();
-    if higher >= lower {
-        return higher;
+    let higher = high.parse::<u64>().unwrap();
+    let result = match lower <= higher {
+        true => higher,
+        false => higher + 1,
+    };
+    if verbose {
+        print!("lower range found as {}{}; ", result, result,);
     }
-    higher + 1
+
+    result
 }
 fn lexicographical_upper_bound(num_str: &str, verbose: bool) -> u64 {
     let (high, low) = num_str.split_at(num_str.len() / 2);
     if high.len() < low.len() {
-        if verbose {
-            println!("default high digits {}", 4 * (low.len() / 2));
-        }
-        return ("9".repeat(low.len() / 2))
+        let result = ("9".repeat(low.len() / 2))
             .parse::<u64>()
             .unwrap_or_default();
-    } else {
         if verbose {
-            println!("found high digits {}", low.len() * 2);
+            print!(
+                "range has too many digits at {}, running {}{}; ",
+                num_str.len(),
+                result,
+                result,
+            );
         }
+        return result;
     }
-    let higher = high.parse::<u64>().unwrap();
     let lower = low.parse::<u64>().unwrap();
-    if higher <= lower {
-        return higher;
+    let higher = high.parse::<u64>().unwrap();
+    let result = match lower >= higher {
+        true => higher,
+        false => higher - 1,
+    };
+    if verbose {
+        print!("upper range found as {}{}; ", result, result,);
     }
-    higher - 1
+
+    result
 }
