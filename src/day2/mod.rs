@@ -20,22 +20,21 @@ pub fn find_invalid_ids_lexicographically(range: &str, verbose: bool) -> Vec<u64
     let result: Vec<u64> = (start_dup_range..=end_dup_range)
         .map(|i| format!("{}{}", i, i).parse::<u64>().unwrap())
         .collect();
-    if verbose && !result.is_empty() {
-        print!("{} has invalid IDs ", range);
+    if verbose {
+        if !result.is_empty() {
+            print!("{} has invalid IDs ", range);
 
-        print!(
-            "{}",
-            result
-                .iter()
-                .map(|y| y.to_string())
-                .collect::<Vec<String>>()
-                .join(", ")
-        );
-        // for v in &result {
-        //     print!(",{}", v)
-        // }
-    }
-    println!();
+            print!(
+                "{}",
+                result
+                    .iter()
+                    .map(|y| y.to_string())
+                    .collect::<Vec<String>>()
+                    .join(", ")
+            );
+        }
+        println!();
+    };
     result
 }
 

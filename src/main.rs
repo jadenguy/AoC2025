@@ -61,12 +61,12 @@ fn run_day2() {
         .unwrap()
         .split(',')
         .map(|l| {
-            find_invalid_ids_lexicographically(l, true)
+            find_invalid_ids_lexicographically(l, false)
                 .iter()
                 .sum::<u64>()
         })
         .sum::<u64>();
-    println!("Day 2 Part 1: {}", invalid_ids)
+    println!("Day 2 Part 1: Invalids IDs sum to {}", invalid_ids)
 }
 
 fn run_day3() {
