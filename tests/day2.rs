@@ -1,5 +1,5 @@
 #[cfg(test)]
-mod tests {
+mod tests_p1 {
     use aoc2025::day2::find_invalid_ids_lexicographically;
     #[test]
     fn find_invalid_ids_lexicographically_123_1010() {
@@ -119,5 +119,24 @@ mod tests {
             .sum::<u64>();
         // assert
         assert_eq!(invalid_ids, 1227775554)
+    }
+}
+mod tests_p2 {
+    use aoc2025::day2::find_invalid_ids_lexicographically;
+    #[test]
+    fn find_invalid_ids_lexicographically_sample_data() {
+        // arrange
+        let id_ranges = "11-22,95-115,998-1012,1188511880-1188511890,222220-222224,1698522-1698528,446443-446449,38593856-38593862,565653-565659,824824821-824824827,2121212118-2121212124".split(',');
+        // act
+
+        let invalid_ids = id_ranges
+            .map(|id_range| {
+                find_invalid_ids_lexicographically(id_range, true)
+                    .iter()
+                    .sum::<u64>()
+            })
+            .sum::<u64>();
+        // assert
+        assert_eq!(invalid_ids, 4174379265)
     }
 }

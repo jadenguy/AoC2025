@@ -13,17 +13,25 @@ pub fn find_invalid_ids_lexicographically(range: &str, verbose: bool) -> Vec<u64
         }
         return vec![];
     }
-    let start_dup_range = lexicographical_lower_bound_by_two(first, verbose);
-    let end_dup_range = lexicographical_upper_bound_by_two(last, verbose);
-    if end_dup_range < start_dup_range {
+    let divisor = 2;
+    let start_dup_range = lexicographical_lower_bound(first, divisor, verbose);
+    let end_dup_range = lexicographical_upper_bound(last, divisor, verbose);
+    let end_digits = end_dup_range.digits.parse::<u64>().unwrap();
+    let start_digits = start_dup_range.digits.parse::<u64>().unwrap();
+    if end_digits < start_digits {
         if verbose {
             println!("{} has no invalid ids", range)
         }
         return vec![];
     }
 
-    let result: Vec<u64> = (start_dup_range.digits..=end_dup_range.digits)
-        .map(|i| i.to_string().repeat((start_dup_range.count)).parse::<u64>().unwrap())
+    let result: Vec<u64> = (start_digits..=end_digits)
+        .map(|i| {
+            i.to_string()
+                .repeat(start_dup_range.count)
+                .parse::<u64>()
+                .unwrap()
+        })
         .collect();
     if verbose {
         if !result.is_empty() {
@@ -43,19 +51,12 @@ pub fn find_invalid_ids_lexicographically(range: &str, verbose: bool) -> Vec<u64
     result
 }
 
-fn lexicographical_lower_bound_by_two(num_str: &str, verbose: bool) -> u64 {
-    lexicographical_lower_bound_by_divisor(num_str, 2, verbose).digits
-}
-fn lexicographical_lower_bound_by_divisor(
-    num_str: &str,
-    divisor: usize,
-    verbose: bool,
-) -> DigitsAndCount {
-    let result;
+fn lexicographical_lower_bound(num_str: &str, divisor: usize, verbose: bool) -> DigitsAndCount {
+    let result: String;
     let len = num_str.len();
     let chunk_size = len - (len / divisor);
     if len < chunk_size {
-        result = u64::MAX;
+        result = u64::MAX.to_string();
     } else if num_str.len() % divisor == 0 {
         let digit_groups: Vec<String> = num_str
             .chars()
@@ -63,19 +64,17 @@ fn lexicographical_lower_bound_by_divisor(
             .chunks(chunk_size)
             .map(|chunk| chunk.iter().collect::<String>())
             .collect();
-        let highest = &digit_groups[0];
+        let highest_chunk = &digit_groups[0];
         let max = digit_groups.iter().max().unwrap();
-        result = match highest == max {
-            true => highest.parse::<u64>().unwrap_or_default(),
-            false => highest.parse::<u64>().unwrap_or_default() + 1,
+        result = match highest_chunk == max {
+            false => (highest_chunk.parse::<u64>().unwrap_or_default() + 1).to_string(),
+            true => highest_chunk.to_string(),
         };
         if verbose {
             print!("lower range found as {}{}; ", result, result,);
         }
     } else {
-        result = (String::from("1") + &"0".repeat(chunk_size - 1))
-            .parse::<u64>()
-            .unwrap();
+        result = String::from("1") + &"0".repeat(chunk_size - 1);
         if verbose {
             print!(
                 "range has too few starting digits at {}, running {}{}; ",
@@ -89,22 +88,15 @@ fn lexicographical_lower_bound_by_divisor(
     }
 }
 struct DigitsAndCount {
-    digits: u64,
+    digits: String,
     count: usize,
 }
-fn lexicographical_upper_bound_by_two(num_str: &str, verbose: bool) -> u64 {
-    lexicographical_upper_bound_by_divisor(num_str, 2, verbose).digits
-}
-fn lexicographical_upper_bound_by_divisor(
-    num_str: &str,
-    divisor: usize,
-    verbose: bool,
-) -> DigitsAndCount {
+fn lexicographical_upper_bound(num_str: &str, divisor: usize, verbose: bool) -> DigitsAndCount {
     let len = num_str.len();
     let chunk_size = len - (len / divisor);
-    let result: u64;
+    let result: String;
     if len < chunk_size {
-        result = 0;
+        result = 0.to_string();
     } else if len % chunk_size == 0 {
         let digit_groups: Vec<String> = num_str
             .chars()
@@ -112,32 +104,26 @@ fn lexicographical_upper_bound_by_divisor(
             .chunks(chunk_size)
             .map(|chunk| chunk.iter().collect::<String>())
             .collect();
-        let highest = &digit_groups[0];
+        let highest_chunk = &digit_groups[0];
         let min = digit_groups.iter().min().unwrap();
-        result = match highest == min {
-            true => highest.parse::<u64>().unwrap_or_default(),
-            false => highest.parse::<u64>().unwrap_or_default() - 1,
+        result = match highest_chunk == min {
+            true => highest_chunk.to_string(),
+            false => (highest_chunk.parse::<u64>().unwrap_or_default() - 1).to_string(),
         };
         if verbose {
             print!("upper range found as {}{}; ", result, result,);
         }
     } else {
-        result = ("9".repeat(chunk_size - 1))
-            .parse::<u64>()
-            .unwrap_or_default();
+        result = "9".repeat(chunk_size - 1);
         if verbose {
             print!(
                 "range has too many digits at {}, running {}{}; ",
                 len, result, result,
             );
         }
-        return DigitsAndCount {
-            digits: result,
-            count: divisor,
-        };
     }
-    return DigitsAndCount {
+    DigitsAndCount {
         digits: result,
         count: divisor,
-    };
+    }
 }
