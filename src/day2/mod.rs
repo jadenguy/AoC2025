@@ -54,22 +54,20 @@ fn lexicographical_lower_bound_by_divisor(
     let len = num_str.len();
     let chunk_size = len - (len / divisor);
     if len < chunk_size {
-        result = 0;
-    } else if num_str.len() % divisor != 1 {
+        result = u64::MAX;
+    } else if num_str.len() % divisor == 0 {
         let digit_groups: Vec<String> = num_str
             .chars()
             .collect::<Vec<_>>()
             .chunks(chunk_size)
             .map(|chunk| chunk.iter().collect::<String>())
             .collect();
-        let var_name = &digit_groups[0];
+        let highest = &digit_groups[0];
         let max = digit_groups.iter().max().unwrap();
-
-        if var_name == max {
-            result = var_name.parse::<u64>().unwrap_or_default();
-        } else {
-            result = var_name.parse::<u64>().unwrap_or_default() + 1;
-        }
+        result = match highest == max {
+            true => highest.parse::<u64>().unwrap_or_default(),
+            false => highest.parse::<u64>().unwrap_or_default() + 1,
+        };
         if verbose {
             print!("lower range found as {}{}; ", result, result,);
         }
@@ -101,14 +99,35 @@ fn lexicographical_upper_bound_by_divisor(
     divisor: usize,
     verbose: bool,
 ) -> DigitsAndCount {
-    if num_str.len() % divisor == 1 {
-        let result = ("9".repeat(divisor - 1)).parse::<u64>().unwrap_or_default();
+    let len = num_str.len();
+    let chunk_size = len - (len / divisor);
+    let result: u64;
+    if len < chunk_size {
+        result = 0;
+    } else if len % chunk_size == 0 {
+        let digit_groups: Vec<String> = num_str
+            .chars()
+            .collect::<Vec<_>>()
+            .chunks(chunk_size)
+            .map(|chunk| chunk.iter().collect::<String>())
+            .collect();
+        let highest = &digit_groups[0];
+        let min = digit_groups.iter().min().unwrap();
+        result = match highest == min {
+            true => highest.parse::<u64>().unwrap_or_default(),
+            false => highest.parse::<u64>().unwrap_or_default() - 1,
+        };
+        if verbose {
+            print!("upper range found as {}{}; ", result, result,);
+        }
+    } else {
+        result = ("9".repeat(chunk_size - 1))
+            .parse::<u64>()
+            .unwrap_or_default();
         if verbose {
             print!(
                 "range has too many digits at {}, running {}{}; ",
-                num_str.len(),
-                result,
-                result,
+                len, result, result,
             );
         }
         return DigitsAndCount {
@@ -116,19 +135,8 @@ fn lexicographical_upper_bound_by_divisor(
             count: divisor,
         };
     }
-    let (high, low) = num_str.split_at(num_str.len() / divisor);
-    let lower = low.parse::<u64>().unwrap();
-    let higher = high.parse::<u64>().unwrap();
-    let result = match lower >= higher {
-        true => higher,
-        false => higher - 1,
-    };
-    if verbose {
-        print!("upper range found as {}{}; ", result, result,);
-    }
-
-    DigitsAndCount {
+    return DigitsAndCount {
         digits: result,
         count: divisor,
-    }
+    };
 }
