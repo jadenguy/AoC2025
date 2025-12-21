@@ -9,7 +9,7 @@ pub fn find_invalid_ids_lexicographically(range: &str, verbose: bool) -> Vec<u64
         }
         return vec![];
     }
-    let start_dup_range = lexicographical_lower_bound(first, verbose);
+    let start_dup_range = lexicographical_lower_bound_by_two(first, verbose);
     let end_dup_range = lexicographical_upper_bound(last, verbose);
     if end_dup_range < start_dup_range {
         if verbose {
@@ -38,9 +38,16 @@ pub fn find_invalid_ids_lexicographically(range: &str, verbose: bool) -> Vec<u64
     result
 }
 
-fn lexicographical_lower_bound(num_str: &str, verbose: bool) -> u64 {
-    let (high, low) = num_str.split_at(num_str.len() / 2);
-    if num_str.len() % 2 == 1 {
+fn lexicographical_lower_bound_by_two(num_str: &str, verbose: bool) -> u64 {
+    lexicographical_lower_bound_by_divisor(num_str, 2, verbose).digits
+}
+fn lexicographical_lower_bound_by_divisor(
+    num_str: &str,
+    divisor: usize,
+    verbose: bool,
+) -> DigitsAndCount {
+    let (high, low) = num_str.split_at(num_str.len() / divisor);
+    if num_str.len() % divisor == 1 {
         let n = high.len();
         let var_name = "0";
         let repeat = var_name.repeat(n);
@@ -53,7 +60,10 @@ fn lexicographical_lower_bound(num_str: &str, verbose: bool) -> u64 {
                 result,
             );
         }
-        return result;
+        return DigitsAndCount {
+            digits: result,
+            count: divisor,
+        };
     }
     let lower = low.parse::<u64>().unwrap();
     let higher = high.parse::<u64>().unwrap();
@@ -65,15 +75,25 @@ fn lexicographical_lower_bound(num_str: &str, verbose: bool) -> u64 {
         print!("lower range found as {}{}; ", result, result,);
     }
 
-    result
+    return DigitsAndCount {
+        digits: result,
+        count: divisor,
+    };
 }
 struct DigitsAndCount {
-    digits: i32,
-    count: i32,
+    digits: u64,
+    count: usize,
 }
 fn lexicographical_upper_bound(num_str: &str, verbose: bool) -> u64 {
-    let (high, low) = num_str.split_at(num_str.len() / 2);
-    if num_str.len() % 2 == 1 {
+    lexicographical_upper_bound_by_divisor(num_str, 2, verbose).digits
+}
+fn lexicographical_upper_bound_by_divisor(
+    num_str: &str,
+    divisor: usize,
+    verbose: bool,
+) -> DigitsAndCount {
+    let (high, low) = num_str.split_at(num_str.len() / divisor);
+    if num_str.len() % divisor == 1 {
         let result = ("9".repeat(low.len() - 1))
             .parse::<u64>()
             .unwrap_or_default();
@@ -85,7 +105,10 @@ fn lexicographical_upper_bound(num_str: &str, verbose: bool) -> u64 {
                 result,
             );
         }
-        return result;
+        return DigitsAndCount {
+            digits: result,
+            count: divisor,
+        };
     }
     let lower = low.parse::<u64>().unwrap();
     let higher = high.parse::<u64>().unwrap();
@@ -97,5 +120,8 @@ fn lexicographical_upper_bound(num_str: &str, verbose: bool) -> u64 {
         print!("upper range found as {}{}; ", result, result,);
     }
 
-    result
+    DigitsAndCount {
+        digits: result,
+        count: divisor,
+    }
 }
