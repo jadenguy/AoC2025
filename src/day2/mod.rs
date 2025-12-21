@@ -40,7 +40,7 @@ pub fn find_invalid_ids_lexicographically(range: &str, verbose: bool) -> Vec<u64
 
 fn lexicographical_lower_bound(num_str: &str, verbose: bool) -> u64 {
     let (high, low) = num_str.split_at(num_str.len() / 2);
-    if high.len() < low.len() {
+    if num_str.len() % 2 == 1 {
         let n = high.len();
         let var_name = "0";
         let repeat = var_name.repeat(n);
@@ -67,9 +67,13 @@ fn lexicographical_lower_bound(num_str: &str, verbose: bool) -> u64 {
 
     result
 }
+struct DigitsAndCount {
+    digits: i32,
+    count: i32,
+}
 fn lexicographical_upper_bound(num_str: &str, verbose: bool) -> u64 {
     let (high, low) = num_str.split_at(num_str.len() / 2);
-    if high.len() < low.len() {
+    if num_str.len() % 2 == 1 {
         let result = ("9".repeat(low.len() - 1))
             .parse::<u64>()
             .unwrap_or_default();
