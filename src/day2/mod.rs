@@ -10,7 +10,7 @@ pub fn find_invalid_ids_lexicographically(range: &str, verbose: bool) -> Vec<u64
         return vec![];
     }
     let start_dup_range = lexicographical_lower_bound_by_two(first, verbose);
-    let end_dup_range = lexicographical_upper_bound(last, verbose);
+    let end_dup_range = lexicographical_upper_bound_by_two(last, verbose);
     if end_dup_range < start_dup_range {
         if verbose {
             println!("{} has no invalid ids", range)
@@ -84,7 +84,7 @@ struct DigitsAndCount {
     digits: u64,
     count: usize,
 }
-fn lexicographical_upper_bound(num_str: &str, verbose: bool) -> u64 {
+fn lexicographical_upper_bound_by_two(num_str: &str, verbose: bool) -> u64 {
     lexicographical_upper_bound_by_divisor(num_str, 2, verbose).digits
 }
 fn lexicographical_upper_bound_by_divisor(
