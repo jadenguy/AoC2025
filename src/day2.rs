@@ -1,4 +1,4 @@
-use std::{collections::HashSet, string};
+use std::collections::HashSet;
 
 pub fn find_invalid_ids_lexicographically(range: &str, verbose: bool) -> HashSet<u64> {
     let (first, last) = range.trim().split_once("-").unwrap();
@@ -13,30 +13,28 @@ pub fn find_invalid_ids_lexicographically(range: &str, verbose: bool) -> HashSet
     }
     let mut primes: HashSet<usize> = HashSet::new();
     for divisor in 2..=last.len() {
-        if !primes.iter().any(|n| divisor % n == 0) {
+        if primes.iter().any(|n| divisor % n == 0) {
+            if verbose {
+                println!("    skipping {} divisor as nonprime", divisor)
+            }
+        } else {
             primes.insert(divisor);
             let (result, start_dup_range, end_dup_range) = get_repeats(first, last, divisor);
-            if result.is_empty() && verbose {
-                println!("  divisor {} yielded no results", divisor)
-            } else if verbose {
-                if !result.is_empty() {
+            if verbose {
+                if result.is_empty() {
+                    println!("  divisor {} yielded no results", divisor)
+                } else {
                     print!(
                         "  divisor {} found invalid IDs from {} to {}",
                         divisor,
                         start_dup_range.repeat(divisor),
                         end_dup_range.repeat(divisor)
                     );
-                } else {
-                    print!("no {} repeats", divisor);
+                    println!();
                 }
-                println!();
             }
             for v in result {
                 results.insert(v);
-            }
-        } else {
-            if verbose {
-                println!("    skipping {} divisor as nonprime", divisor)
             }
         }
     }
