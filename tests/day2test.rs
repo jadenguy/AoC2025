@@ -2,6 +2,88 @@
 mod tests_p1 {
     static VERBOSE: bool = false;
     use aoc2025::day2::find_invalid_ids_lexicographically_by_two;
+    use aoc2025::day2::lexicographical_lowest_bound;
+    use aoc2025::day2::lexicographical_upper_bound;
+    #[test]
+    fn test_lexicographical_lowest_bound_755745207_into_3() {
+        let number = "755745207";
+        let divisor = 3;
+        let expected = "755755755";
+        let x = lexicographical_lowest_bound(number, divisor).repeat(divisor);
+        assert_eq!(x, expected)
+    }
+    #[test]
+    fn test_lexicographical_upper_bound_755766099_into_3() {
+        let number = "755766099";
+        let divisor = 3;
+        let expected = "755755755";
+        let x = lexicographical_upper_bound(number, divisor).repeat(divisor);
+        assert_eq!(x, expected)
+    }
+    #[test]
+    fn test_lexicographical_lowest_bound_1_into_2() {
+        let number = "1";
+        let divisor = 2;
+        let expected = "11";
+        let x = lexicographical_lowest_bound(number, divisor).repeat(divisor);
+        assert_eq!(x, expected)
+    }
+    #[test]
+    fn test_lexicographical_lowest_bound_11_into_2() {
+        let number = "11";
+        let divisor = 2;
+        let expected = "11";
+        let x = lexicographical_lowest_bound(number, divisor).repeat(divisor);
+        assert_eq!(x, expected)
+    }
+    #[test]
+    fn test_lexicographical_lowest_bound_11_into_3() {
+        let number = "11";
+        let divisor = 3;
+        let expected = "111";
+        let x = lexicographical_lowest_bound(number, divisor).repeat(divisor);
+        assert_eq!(x, expected)
+    }
+    #[test]
+    fn test_lexicographical_lowest_bound_95_into_2() {
+        let number = "95";
+        let divisor = 2;
+        let expected = "99";
+        let x = lexicographical_lowest_bound(number, divisor).repeat(divisor);
+        assert_eq!(x, expected)
+    }
+    #[test]
+    fn test_lexicographical_lowest_bound_95_into_3() {
+        let number = "95";
+        let divisor = 3;
+        let expected = "111";
+        let x = lexicographical_lowest_bound(number, divisor).repeat(divisor);
+        assert_eq!(x, expected)
+    }
+    #[test]
+    fn test_lexicographical_lowest_bound_995_into_3() {
+        let number = "995";
+        let divisor = 3;
+        let expected = "999";
+        let x = lexicographical_lowest_bound(number, divisor).repeat(divisor);
+        assert_eq!(x, expected)
+    }
+    #[test]
+    fn test_lexicographical_upper_bound_995_into_3() {
+        let number = "995";
+        let divisor = 3;
+        let expected = "888";
+        let x = lexicographical_upper_bound(number, divisor).repeat(divisor);
+        assert_eq!(x, expected)
+    }
+    #[test]
+    fn test_lexicographical_upper_bound_995_into_2() {
+        let number = "995";
+        let divisor = 2;
+        let expected = "99";
+        let x = lexicographical_upper_bound(number, divisor).repeat(divisor);
+        assert_eq!(x, expected)
+    }
     #[test]
     fn find_invalid_ids_lexicographically_123_1010() {
         // arrange
@@ -108,7 +190,11 @@ mod tests_p1 {
     #[test]
     fn find_invalid_ids_lexicographically_sample_data() {
         // arrange
-        let id_ranges = "11-22,95-115,998-1012,1188511880-1188511890,222220-222224,1698522-1698528,446443-446449,38593856-38593862,565653-565659,824824821-824824827,2121212118-2121212124".split(',');
+        let id_ranges = "11-22,95-115,998-1012,1188511880-1188511890,222220-222224,
+            1698522-1698528,446443-446449,38593856-38593862,565653-565659,824824821-824824827,
+            2121212118-2121212124"
+            .split(',')
+            .map(|x| x.trim());
         // act
 
         let invalid_ids = id_ranges
@@ -126,11 +212,17 @@ mod tests_p1 {
 mod tests_p2 {
 
     static VERBOSE: bool = true;
+    use std::collections::HashSet;
+
     use aoc2025::day2::find_invalid_ids_lexicographically;
     #[test]
     fn find_invalid_ids_lexicographically_sample_data() {
         // arrange
-        let id_ranges = "11-22,95-115,998-1012,1188511880-1188511890,222220-222224,1698522-1698528,446443-446449,38593856-38593862,565653-565659,824824821-824824827,2121212118-2121212124".split(',');
+        let id_ranges = "11-22,95-115,998-1012,1188511880-1188511890,222220-222224,
+            1698522-1698528,446443-446449,38593856-38593862,565653-565659,824824821-824824827,
+            2121212118-2121212124"
+            .split(',')
+            .map(|x| x.trim());
         // act
 
         let invalid_ids = id_ranges
@@ -144,12 +236,49 @@ mod tests_p2 {
         assert_eq!(invalid_ids, 4174379265)
     }
     #[test]
+    fn find_invalid_ids_lexicographically_answer() {
+        // arrange
+        let id_ranges = "4487-9581,755745207-755766099,
+            954895848-955063124,4358832-4497315,15-47,
+            1-12,9198808-9258771,657981-762275,6256098346-6256303872,
+            142-282,13092529-13179528,96201296-96341879,19767340-19916378,
+            2809036-2830862,335850-499986,172437-315144,764434-793133,
+            910543-1082670,2142179-2279203,6649545-6713098,6464587849-6464677024,
+            858399-904491,1328-4021,72798-159206,89777719-90005812,91891792-91938279,
+            314-963,48-130,527903-594370,24240-60212\n"
+            .split(',')
+            .map(|x| x.trim());
+        // act
+        let invalid_ids: Vec<u64> = id_ranges
+            .map(|id_range| find_invalid_ids_lexicographically(id_range, VERBOSE))
+            .flatten()
+            .collect();
+        // assert
+        let invalid_unique: HashSet<u64> = HashSet::from_iter(invalid_ids);
+        let invalid_sum: u64 = invalid_unique.iter().sum();
+        assert_eq!(invalid_sum, 31755323497)
+    }
+    #[test]
     fn find_invalid_ids_lexicographically_95_115() {
         // arrange
         let id_range = "95-115";
+        let mut expected: HashSet<u64> = HashSet::new();
+        expected.insert(99);
+        expected.insert(111);
         // act
         let invalid_ids = find_invalid_ids_lexicographically(id_range, VERBOSE);
         // assert
-        assert_eq!(invalid_ids, [99, 111])
+        assert_eq!(invalid_ids, expected)
+    }
+    #[test]
+    fn find_invalid_ids_lexicographically_755745207_755766099() {
+        // arrange
+        let id_range = "755745207-755766099";
+        let mut expected: HashSet<u64> = HashSet::new();
+        expected.insert(755755755);
+        // act
+        let invalid_ids = find_invalid_ids_lexicographically(id_range, VERBOSE);
+        // assert
+        assert_eq!(invalid_ids, expected)
     }
 }
