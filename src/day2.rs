@@ -86,9 +86,12 @@ pub fn lexicographical_lowest_bound(num_str: &str, divisor: usize) -> String {
 
         ret
     } else {
-        let (_chunks, highest_chunk, _second_chunk, _min, max, _asc) =
-            get_chunks_and_info(num_str, chunk);
-        let ret = match highest_chunk == max {
+        // let (_chunks, highest_chunk, _second_chunk, _min, max, _asc) =
+        //     get_chunks_and_info(num_str, chunk);
+        let chunks = get_chunks(num_str, chunk);
+        let highest_chunk = chunks[0].to_owned();
+        let first_chunk_lowest = chunks_equal_or_desc(&chunks, &highest_chunk);
+        let ret = match first_chunk_lowest {
             false => (highest_chunk.parse::<u64>().unwrap_or_default() + 1).to_string(),
             true => highest_chunk.to_string(),
         };
@@ -96,14 +99,28 @@ pub fn lexicographical_lowest_bound(num_str: &str, divisor: usize) -> String {
         ret
     }
 }
+
+fn chunks_equal_or_desc(chunks: &[String], highest_chunk: &str) -> bool {
+    let mut current: String = highest_chunk.to_string();
+    for val in chunks.iter().skip(1) {
+        if val.to_string() > current {
+            return false;
+        } else if val.to_string() < current {
+            return true;
+        } else {
+            current = val.to_string();
+        }
+    }
+    true
+}
 pub fn lexicographical_upper_bound(num_str: &str, divisor: usize) -> String {
     let len = num_str.len();
     if len < divisor {
         0.to_string()
     } else if len % divisor == 0 {
-        let (_chunks, highest_chunk, second_chunk, _min, _max, asc) =
-            get_chunks_and_info(num_str, len / divisor);
-        match highest_chunk < second_chunk || asc {
+        let chunks = get_chunks(num_str, len / divisor);
+        let highest_chunk = chunks[0].to_owned();
+        match chunks_equal_or_asc(&chunks, &highest_chunk) {
             true => highest_chunk.to_string(),
             false => (highest_chunk.parse::<u64>().unwrap_or_default() - 1).to_string(),
         }
@@ -111,24 +128,7 @@ pub fn lexicographical_upper_bound(num_str: &str, divisor: usize) -> String {
         "9".repeat(len / divisor)
     }
 }
-fn get_chunks_and_info(
-    num_str: &str,
-    chunk_size: usize,
-) -> (Vec<String>, String, String, String, String, bool) {
-    let chunks = get_chunks(num_str, chunk_size);
-    get_info(chunks)
-}
-
-fn get_info(chunks: Vec<String>) -> (Vec<String>, String, String, String, String, bool) {
-    let highest_chunk = chunks[0].to_owned();
-    let second_chunk = chunks[1].to_owned();
-    let min = chunks.iter().min().unwrap().to_string();
-    let max = chunks.iter().max().unwrap().to_string();
-    let equal_or_asc = equal_or_asc(&chunks, &highest_chunk);
-    (chunks, highest_chunk, second_chunk, min, max, equal_or_asc)
-}
-
-fn equal_or_asc(chunks: &[String], highest_chunk: &String) -> bool {
+fn chunks_equal_or_asc(chunks: &[String], highest_chunk: &String) -> bool {
     let mut current: String = highest_chunk.to_string();
     for val in chunks.iter().skip(1) {
         if val.to_string() > current {
@@ -143,11 +143,10 @@ fn equal_or_asc(chunks: &[String], highest_chunk: &String) -> bool {
 }
 
 fn get_chunks(num_str: &str, chunk_size: usize) -> Vec<String> {
-    let get_chunks: Vec<String> = num_str
+    num_str
         .chars()
         .collect::<Vec<_>>()
         .chunks(chunk_size)
         .map(|chunk| chunk.iter().collect::<String>())
-        .collect();
-    get_chunks
+        .collect()
 }

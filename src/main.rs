@@ -74,7 +74,7 @@ fn run_day2() {
         .unwrap()
         .split(',')
         .map(|l| {
-            find_invalid_ids_lexicographically(l, true)
+            find_invalid_ids_lexicographically(l, false)
                 .iter()
                 .sum::<u64>()
         })

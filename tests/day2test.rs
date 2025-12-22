@@ -259,7 +259,11 @@ mod tests_p2 {
         );
         let mut x: Vec<u64> = invalid_unique.iter().map(|n| n.to_owned()).collect();
         x.sort();
-        let y: u64 = x.iter().sum();
+        let mut y: u64 = 0;
+        x.into_iter().for_each(|v| {
+            y += v;
+            println!("{} added to sum, now {}", v, y);
+        });
         let invalid_sum: u64 = invalid_unique.iter().sum();
         // assert
         assert_eq!(invalid_sum, 31755323497);
@@ -283,6 +287,16 @@ mod tests_p2 {
         let id_range = "755745207-755766099";
         let mut expected: HashSet<u64> = HashSet::new();
         expected.insert(755755755);
+        // act
+        let invalid_ids = find_invalid_ids_lexicographically(id_range, VERBOSE);
+        // assert
+        assert_eq!(invalid_ids, expected)
+    }
+    #[test]
+    fn find_invalid_ids_lexicographically_314_963() {
+        // arrange
+        let id_range = "314-963";
+        let expected: HashSet<u64> = HashSet::from_iter([333, 444, 555, 666, 777, 888]);
         // act
         let invalid_ids = find_invalid_ids_lexicographically(id_range, VERBOSE);
         // assert
