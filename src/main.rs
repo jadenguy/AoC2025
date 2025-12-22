@@ -54,14 +54,14 @@ fn run_day1() {
 }
 
 fn run_day2() {
-    use aoc2025::day2::find_invalid_ids_lexicographically;
+    use aoc2025::day2::find_invalid_ids_lexicographically_by_two;
     let lines = read_lines("./data/day2/part1.txt").expect("Failed to read lines from file");
     let invalid_ids = lines
         .first()
         .unwrap()
         .split(',')
         .map(|l| {
-            find_invalid_ids_lexicographically(l, false)
+            find_invalid_ids_lexicographically_by_two(l, false)
                 .iter()
                 .sum::<u64>()
         })

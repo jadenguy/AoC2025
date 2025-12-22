@@ -1,7 +1,12 @@
 pub fn find_invalid_ids_lexicographically(range: &str, verbose: bool) -> Vec<u64> {
-    if verbose {
-        print!("{} check; ", range);
+    let (first, last) = range.trim().split_once("-").unwrap();
+    let mut results: Vec<Vec<u64>> = vec![];
+    for divisor in 2..=last.len() {
+        results.push(get_repeats(range, verbose, first, last, divisor));
     }
+    results.into_iter().flatten().collect()
+}
+pub fn find_invalid_ids_lexicographically_by_two(range: &str, verbose: bool) -> Vec<u64> {
     let (first, last) = range.trim().split_once("-").unwrap();
     if (first.len() == last.len()) && (first.len() % 2 == 1) {
         if verbose {
@@ -13,29 +18,25 @@ pub fn find_invalid_ids_lexicographically(range: &str, verbose: bool) -> Vec<u64
         }
         return vec![];
     }
-    let divisor = 2;
-    let start_dup_range = lexicographical_lower_bound(first, divisor, verbose);
+    get_repeats(range, verbose, first, last, 2)
+}
+fn get_repeats(range: &str, verbose: bool, first: &str, last: &str, divisor: usize) -> Vec<u64> {
+    let start_dup_range = lexicographical_lowest_bound(first, divisor, verbose);
     let end_dup_range = lexicographical_upper_bound(last, divisor, verbose);
-    let end_digits = end_dup_range.digits.parse::<u64>().unwrap();
-    let start_digits = start_dup_range.digits.parse::<u64>().unwrap();
+    let end_digits = end_dup_range.parse::<u64>().unwrap();
+    let start_digits = start_dup_range.parse::<u64>().unwrap();
     if end_digits < start_digits {
         if verbose {
-            println!("{} has no invalid ids", range)
+            println!("{} has no invalid ids in divisor {}", range, divisor)
         }
         return vec![];
     }
-
     let result: Vec<u64> = (start_digits..=end_digits)
-        .map(|i| {
-            i.to_string()
-                .repeat(start_dup_range.count)
-                .parse::<u64>()
-                .unwrap()
-        })
+        .map(|i| i.to_string().repeat(divisor).parse::<u64>().unwrap())
         .collect();
     if verbose {
         if !result.is_empty() {
-            print!("{} has invalid IDs ", range);
+            print!("{} has invalid IDs in divisor {} ", range, divisor);
 
             print!(
                 "{}",
@@ -50,80 +51,84 @@ pub fn find_invalid_ids_lexicographically(range: &str, verbose: bool) -> Vec<u64
     };
     result
 }
-
-fn lexicographical_lower_bound(num_str: &str, divisor: usize, verbose: bool) -> DigitsAndCount {
-    let result: String;
+fn lexicographical_lowest_bound(num_str: &str, divisor: usize, verbose: bool) -> String {
     let len = num_str.len();
-    let chunk_size = len - (len / divisor);
-    if len < chunk_size {
-        result = u64::MAX.to_string();
-    } else if num_str.len() % divisor == 0 {
-        let digit_groups: Vec<String> = num_str
-            .chars()
-            .collect::<Vec<_>>()
-            .chunks(chunk_size)
-            .map(|chunk| chunk.iter().collect::<String>())
-            .collect();
-        let highest_chunk = &digit_groups[0];
-        let max = digit_groups.iter().max().unwrap();
-        result = match highest_chunk == max {
+    let chunk = len / divisor;
+    if len < divisor {
+        // if there aren't enough chunks, return a safe default
+        //   of a single 1
+        // if verbose {
+        //     print!(
+        //         "smallest chunk possible for divisor {} is {}; ",
+        //         divisor,
+        //         1.to_string().repeat(divisor)
+        //     )
+        // }
+        return 1.to_string();
+    }
+    if len % divisor != 0 {
+        // if there are uneven chunks, return the lowest possible chunk as the first chunk
+        let ret = String::from("1") + &"0".repeat(len - (chunk) - 1);
+        // if verbose {
+        //     print!(
+        //         "smallest chunk bigger than {} digits for divisor {} for this len is {}; ",
+        //         len,
+        //         divisor,
+        //         ret.to_string().repeat(divisor)
+        //     )
+        // }
+        ret
+    } else {
+        let (highest_chunk, _min, max) = get_chunks(num_str, chunk);
+        let ret = match highest_chunk == max {
             false => (highest_chunk.parse::<u64>().unwrap_or_default() + 1).to_string(),
             true => highest_chunk.to_string(),
         };
-        if verbose {
-            print!("lower range found as {}{}; ", result, result,);
-        }
-    } else {
-        result = String::from("1") + &"0".repeat(chunk_size - 1);
-        if verbose {
-            print!(
-                "range has too few starting digits at {}, running {}{}; ",
-                len, result, result,
-            );
-        }
-    }
-    DigitsAndCount {
-        digits: result,
-        count: divisor,
+        // if verbose {
+        //     print!(
+        //         "smallest chunk bigger than {} digits for divisor {} for this len is {}; ",
+        //         len,
+        //         divisor,
+        //         ret.to_string().repeat(divisor)
+        //     )
+        // }
+        ret
     }
 }
-struct DigitsAndCount {
-    digits: String,
-    count: usize,
-}
-fn lexicographical_upper_bound(num_str: &str, divisor: usize, verbose: bool) -> DigitsAndCount {
-    let len = num_str.len();
-    let chunk_size = len - (len / divisor);
-    let result: String;
-    if len < chunk_size {
-        result = 0.to_string();
-    } else if len % chunk_size == 0 {
-        let digit_groups: Vec<String> = num_str
-            .chars()
-            .collect::<Vec<_>>()
-            .chunks(chunk_size)
-            .map(|chunk| chunk.iter().collect::<String>())
-            .collect();
-        let highest_chunk = &digit_groups[0];
-        let min = digit_groups.iter().min().unwrap();
-        result = match highest_chunk == min {
-            true => highest_chunk.to_string(),
-            false => (highest_chunk.parse::<u64>().unwrap_or_default() - 1).to_string(),
-        };
-        if verbose {
-            print!("upper range found as {}{}; ", result, result,);
-        }
+fn lexicographical_upper_bound(num_str: &str, divisor: usize, verbose: bool) -> String {
+    if num_str.len() < divisor {
+        0.to_string()
+    } else if num_str.len() % divisor == 0 {
+        let (highest_chunk, min, _max) = get_chunks(num_str, num_str.len() / divisor);
+        get_lowest_upper_bound(divisor, verbose, highest_chunk, min)
     } else {
-        result = "9".repeat(chunk_size - 1);
-        if verbose {
-            print!(
-                "range has too many digits at {}, running {}{}; ",
-                len, result, result,
-            );
-        }
+        "9".repeat(num_str.len() / divisor)
     }
-    DigitsAndCount {
-        digits: result,
-        count: divisor,
+}
+fn get_chunks(num_str: &str, chunk_size: usize) -> (String, String, String) {
+    let digit_groups: Vec<String> = num_str
+        .chars()
+        .collect::<Vec<_>>()
+        .chunks(chunk_size)
+        .map(|chunk| chunk.iter().collect::<String>())
+        .collect();
+    let highest_chunk = digit_groups[0].to_owned();
+    let min = digit_groups.iter().min().unwrap().to_string();
+    let max = digit_groups.iter().max().unwrap().to_string();
+    (highest_chunk, min, max)
+}
+fn get_lowest_upper_bound(
+    divisor: usize,
+    verbose: bool,
+    highest_chunk: String,
+    min: String,
+) -> String {
+    let result = match highest_chunk == min {
+        true => highest_chunk.to_string(),
+        false => (highest_chunk.parse::<u64>().unwrap_or_default() - 1).to_string(),
+    };
+    if verbose {
+        print!("upper range found as {}; ", result.repeat(divisor),);
     }
+    result
 }

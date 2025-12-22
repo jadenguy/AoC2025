@@ -1,12 +1,13 @@
 #[cfg(test)]
 mod tests_p1 {
-    use aoc2025::day2::find_invalid_ids_lexicographically;
+    static VERBOSE: bool = false;
+    use aoc2025::day2::find_invalid_ids_lexicographically_by_two;
     #[test]
     fn find_invalid_ids_lexicographically_123_1010() {
         // arrange
         let id_range = "123-1010";
         // act
-        let invalid_ids = find_invalid_ids_lexicographically(id_range, true);
+        let invalid_ids = find_invalid_ids_lexicographically_by_two(id_range, VERBOSE);
         // assert
         assert_eq!(invalid_ids, [1010])
     }
@@ -15,7 +16,7 @@ mod tests_p1 {
         // arrange
         let id_range = "111-222";
         // act
-        let invalid_ids = find_invalid_ids_lexicographically(id_range, true);
+        let invalid_ids = find_invalid_ids_lexicographically_by_two(id_range, VERBOSE);
         // assert
         assert_eq!(invalid_ids, [])
     }
@@ -24,7 +25,7 @@ mod tests_p1 {
         // arrange
         let id_range = "4487-9581";
         // act
-        let invalid_ids = find_invalid_ids_lexicographically(id_range, true);
+        let invalid_ids = find_invalid_ids_lexicographically_by_two(id_range, VERBOSE);
         // assert
         assert_eq!(
             invalid_ids,
@@ -41,7 +42,7 @@ mod tests_p1 {
         // arrange
         let id_range = "910543-1082670";
         // act
-        let invalid_ids = find_invalid_ids_lexicographically(id_range, true);
+        let invalid_ids = find_invalid_ids_lexicographically_by_two(id_range, VERBOSE);
         // assert
         assert_eq!(
             invalid_ids,
@@ -63,7 +64,7 @@ mod tests_p1 {
         // arrange
         let id_range = "72798-159206";
         // act
-        let invalid_ids = find_invalid_ids_lexicographically(id_range, true);
+        let invalid_ids = find_invalid_ids_lexicographically_by_two(id_range, VERBOSE);
         // assert
         assert_eq!(
             invalid_ids,
@@ -82,7 +83,7 @@ mod tests_p1 {
         // arrange
         let id_range = "222-333";
         // act
-        let invalid_ids = find_invalid_ids_lexicographically(id_range, true);
+        let invalid_ids = find_invalid_ids_lexicographically_by_two(id_range, VERBOSE);
         // assert
         assert_eq!(invalid_ids, [])
     }
@@ -91,7 +92,7 @@ mod tests_p1 {
         // arrange
         let id_range = "95-115";
         // act
-        let invalid_ids = find_invalid_ids_lexicographically(id_range, true);
+        let invalid_ids = find_invalid_ids_lexicographically_by_two(id_range, VERBOSE);
         // assert
         assert_eq!(invalid_ids, [99])
     }
@@ -100,7 +101,7 @@ mod tests_p1 {
         // arrange
         let id_range = "11-22";
         // act
-        let invalid_ids = find_invalid_ids_lexicographically(id_range, true);
+        let invalid_ids = find_invalid_ids_lexicographically_by_two(id_range, VERBOSE);
         // assert
         assert_eq!(invalid_ids, [11, 22])
     }
@@ -112,7 +113,7 @@ mod tests_p1 {
 
         let invalid_ids = id_ranges
             .map(|id_range| {
-                find_invalid_ids_lexicographically(id_range, true)
+                find_invalid_ids_lexicographically_by_two(id_range, VERBOSE)
                     .iter()
                     .sum::<u64>()
             })
@@ -121,7 +122,10 @@ mod tests_p1 {
         assert_eq!(invalid_ids, 1227775554)
     }
 }
+#[cfg(test)]
 mod tests_p2 {
+
+    static VERBOSE: bool = true;
     use aoc2025::day2::find_invalid_ids_lexicographically;
     #[test]
     fn find_invalid_ids_lexicographically_sample_data() {
@@ -131,12 +135,21 @@ mod tests_p2 {
 
         let invalid_ids = id_ranges
             .map(|id_range| {
-                find_invalid_ids_lexicographically(id_range, true)
+                find_invalid_ids_lexicographically(id_range, VERBOSE)
                     .iter()
                     .sum::<u64>()
             })
             .sum::<u64>();
         // assert
         assert_eq!(invalid_ids, 4174379265)
+    }
+    #[test]
+    fn find_invalid_ids_lexicographically_95_115() {
+        // arrange
+        let id_range = "95-115";
+        // act
+        let invalid_ids = find_invalid_ids_lexicographically(id_range, VERBOSE);
+        // assert
+        assert_eq!(invalid_ids, [99, 111])
     }
 }
