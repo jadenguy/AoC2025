@@ -238,7 +238,7 @@ mod tests_p2 {
     #[test]
     fn find_invalid_ids_lexicographically_answer() {
         // arrange
-        let id_ranges = "4487-9581,755745207-755766099,
+        let mut id_ranges: Vec<&str> = "4487-9581,755745207-755766099,
             954895848-955063124,4358832-4497315,15-47,
             1-12,9198808-9258771,657981-762275,6256098346-6256303872,
             142-282,13092529-13179528,96201296-96341879,19767340-19916378,
@@ -247,16 +247,23 @@ mod tests_p2 {
             858399-904491,1328-4021,72798-159206,89777719-90005812,91891792-91938279,
             314-963,48-130,527903-594370,24240-60212\n"
             .split(',')
-            .map(|x| x.trim());
-        // act
-        let invalid_ids: Vec<u64> = id_ranges
-            .map(|id_range| find_invalid_ids_lexicographically(id_range, VERBOSE))
-            .flatten()
+            .map(|x| x.trim())
             .collect();
-        // assert
-        let invalid_unique: HashSet<u64> = HashSet::from_iter(invalid_ids);
+        // act
+        id_ranges.sort_by_key(|a| (a.len(), a.to_string()));
+        let invalid_unique: HashSet<u64> = HashSet::from_iter(
+            id_ranges
+                .iter()
+                .map(|id_range| find_invalid_ids_lexicographically(id_range, VERBOSE))
+                .flatten(),
+        );
+        let mut x: Vec<u64> = invalid_unique.iter().map(|n| n.to_owned()).collect();
+        x.sort();
+        let y: u64 = x.iter().sum();
         let invalid_sum: u64 = invalid_unique.iter().sum();
-        assert_eq!(invalid_sum, 31755323497)
+        // assert
+        assert_eq!(invalid_sum, 31755323497);
+        assert_eq!(invalid_sum, y)
     }
     #[test]
     fn find_invalid_ids_lexicographically_95_115() {
