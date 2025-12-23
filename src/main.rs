@@ -83,7 +83,18 @@ fn run_day2() {
 }
 
 fn run_day3() {
-    println!("Running day 3 logic");
+    use aoc2025::day3::largest_joltage;
+    let lines = read_lines("./data/day3/part1.txt").expect("Failed to read lines from file");
+    let invalid_ids = lines
+        .iter()
+        .map(|l| largest_joltage(l.to_owned(), 2).parse::<u64>().unwrap())
+        .sum::<u64>();
+    println!("Day 3 Part 1: Jolt total {}", invalid_ids);
+    let invalid_ids = lines
+        .iter()
+        .map(|l| largest_joltage(l.to_owned(), 12).parse::<u64>().unwrap())
+        .sum::<u64>();
+    println!("Day 3 Part 2: Jolt total {}", invalid_ids);
 }
 fn run_day4() {
     println!("Running day 4 logic");
