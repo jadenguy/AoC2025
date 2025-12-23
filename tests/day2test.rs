@@ -211,7 +211,7 @@ mod tests_p1 {
 #[cfg(test)]
 mod tests_p2 {
 
-    static VERBOSE: bool = true;
+    static VERBOSE: bool = false;
     use std::collections::HashSet;
 
     use aoc2025::day2::find_invalid_ids_lexicographically;
@@ -262,7 +262,9 @@ mod tests_p2 {
         let mut y: u64 = 0;
         x.into_iter().for_each(|v| {
             y += v;
-            println!("{} added to sum, now {}", v, y);
+            if VERBOSE {
+                println!("{} added to sum, now {}", v, y);
+            }
         });
         let invalid_sum: u64 = invalid_unique.iter().sum();
         // assert
