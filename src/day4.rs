@@ -1,6 +1,6 @@
 use std::collections::HashMap;
 
-pub fn find_isolated_rolls(board: HashMap<Coordinate, char>) -> Vec<Coordinate> {
+pub fn find_isolated_rolls(board: HashMap<Coordinate, char>) -> usize {
     let mut ret: Vec<Coordinate> = Vec::new();
     let (min_row, min_col) = <(i32, i32)>::from(board.keys().min().unwrap());
     let (max_row, max_col) = <(i32, i32)>::from(board.keys().max().unwrap());
@@ -11,28 +11,20 @@ pub fn find_isolated_rolls(board: HashMap<Coordinate, char>) -> Vec<Coordinate> 
                 col_num: col_num,
             };
             if let Some(n) = board.get(&coord) {
-                if n.to_owned() == '@' {
+                let var_name = n.to_owned();
+                let y = var_name.to_string();
+                if var_name == '@' {
                     let neighbor_count = count_neighbors(&board, row_num, col_num, &coord);
-                    add_if(&mut ret, row_num, col_num, coord, neighbor_count, n);
+                    add_if(&mut ret, coord, neighbor_count);
                 }
             }
         }
     }
-    println!();
-    println!("{},{} to {},{}", min_row, min_col, max_row, max_col);
-    ret
+    ret.len()
 }
 
-fn add_if(
-    ret: &mut Vec<Coordinate>,
-    row_num: i32,
-    col_num: i32,
-    coord: Coordinate,
-    neighbor_count: u8,
-    n: &char,
-) {
+fn add_if(ret: &mut Vec<Coordinate>, coord: Coordinate, neighbor_count: u8) {
     if neighbor_count < 4 {
-        println!("({},{}) {}", row_num, col_num, n);
         ret.push(coord);
     }
 }
@@ -72,4 +64,23 @@ impl From<&Coordinate> for (i32, i32) {
         let &Coordinate { row_num, col_num } = e;
         (row_num, col_num)
     }
+}
+pub fn convert_lines_to_board(board_rows: Vec<String>) -> HashMap<Coordinate, char> {
+    HashMap::from_iter(
+        board_rows
+            .iter()
+            .enumerate()
+            .map(|(row_num, row)| {
+                row.chars().enumerate().map(move |(col_num, cell)| {
+                    (
+                        Coordinate {
+                            row_num: row_num as i32,
+                            col_num: col_num as i32,
+                        },
+                        cell,
+                    )
+                })
+            })
+            .flatten(),
+    )
 }

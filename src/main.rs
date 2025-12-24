@@ -5,7 +5,6 @@ fn main() {
     let args: Vec<String> = env::args().collect();
     if args.iter().count() == 1 {
         run_all();
-        // run_day2();
     } else {
         for day in args.iter().skip(1) {
             let var_name = day.as_str();
@@ -97,7 +96,12 @@ fn run_day3() {
     println!("Day 3 Part 2: Jolt total {}", invalid_ids);
 }
 fn run_day4() {
-    println!("Running day 4 logic");
+    use aoc2025::day4::convert_lines_to_board;
+    use aoc2025::day4::find_isolated_rolls;
+    let rows = read_lines("./data/day4/part1.txt").expect("Failed to read lines from file");
+    let board = convert_lines_to_board(rows);
+    let isolated_rows = find_isolated_rolls(board);
+    println!("Day 4 Part 1: Isolated rolls count {}", isolated_rows)
 }
 fn run_day5() {
     println!("Running day 5 logic");
