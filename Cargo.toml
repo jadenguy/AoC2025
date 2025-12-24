@@ -3,8 +3,5 @@ name = "aoc2025"
 version = "0.1.0"
 edition = "2024"
 
-[dependencies]
-prime_factorization = "1.0.5"
-
 [lib]
 path = "src/lib.rs"
