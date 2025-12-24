@@ -1,4 +1,5 @@
 pub mod common;
+use aoc2025::day4::{Coordinate, find_isolated_rolls_with_output};
 use common::read_lines;
 use std::env;
 fn main() {
@@ -98,10 +99,43 @@ fn run_day3() {
 fn run_day4() {
     use aoc2025::day4::convert_lines_to_board;
     use aoc2025::day4::find_isolated_rolls;
-    let rows = read_lines("./data/day4/part1.txt").expect("Failed to read lines from file");
-    let board = convert_lines_to_board(rows);
-    let isolated_rows = find_isolated_rolls(board);
-    println!("Day 4 Part 1: Isolated rolls count {}", isolated_rows)
+    {
+        let rows = read_lines("./data/day4/part1.txt").expect("Failed to read lines from file");
+        let board = convert_lines_to_board(rows);
+        let isolated_rows = find_isolated_rolls(board);
+        println!("Day 4 Part 1: Isolated rolls count {}", isolated_rows);
+    }
+    {
+        let mut all_found = 0usize;
+        let mut found = 1;
+        let rows = read_lines("./data/day4/part1.txt").expect("Failed to read lines from file");
+        let mut board = convert_lines_to_board(rows);
+        let (max_row, max_col) = <(i32, i32)>::from(board.keys().max().unwrap());
+        while found > 0 {
+            let x = find_isolated_rolls_with_output(board);
+            found = x.0;
+            board = x.1;
+
+            all_found += found;
+
+            // print!("{}[2J", 27 as char);
+            // for row_num in 0..=max_row {
+            //     for col_num in 0..=max_col {
+            //         let coord = Coordinate {
+            //             row_num: row_num,
+            //             col_num: col_num,
+            //         };
+            //         if let Some(n) = board.get(&coord) {
+            //             print!("{}", n);
+            //         } else {
+            //             print!(" ")
+            //         }
+            //     }
+            //     println!();
+            // }
+        }
+        println!("Day 4 Part 2: Isolated rolls count {}", all_found);
+    }
 }
 fn run_day5() {
     println!("Running day 5 logic");
