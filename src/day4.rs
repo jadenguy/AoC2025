@@ -86,3 +86,21 @@ pub fn convert_lines_to_board(board_rows: Vec<String>) -> Board {
             .flatten(),
     )
 }
+pub
+fn print_board(board: &std::collections::HashMap<Coordinate, char>, max_row: i32, max_col: i32) {
+    print!("{}[2J", 27 as char);
+    for row_num in 0..=max_row {
+        for col_num in 0..=max_col {
+            let coord = Coordinate {
+                row_num: row_num,
+                col_num: col_num,
+            };
+            if let Some(n) = board.get(&coord) {
+                print!("{}", n);
+            } else {
+                print!(" ")
+            }
+        }
+        println!();
+    }
+}
