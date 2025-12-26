@@ -60,8 +60,8 @@ fn get_column(vec2d: &Vec<Vec<String>>, row_count: usize, col_num: usize) -> Vec
 }
 pub fn generate_ast_from_problem(data: Vec<String>) -> Option<Expression> {
     if data.len() < 3 {
-        let n = format!("{}", data.join("\n"));
-        println!("{}", n);
+        // let n = format!("{}", data.join("\n"));
+        // println!("{}", n);
         return None;
     }
     let tokens: Vec<Token> = data

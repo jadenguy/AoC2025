@@ -161,13 +161,13 @@ fn run_day6() {
     let actual_sum_of_eval: i64 = problems
         .iter()
         .map(|problem| {
-            println!("{}", problem.join("\n"));
-            println!();
+            // println!("{}", problem.join("\n"));
+            // println!();
             let ast = generate_ast_from_problem(problem.to_owned());
             if let Some(e) = ast {
-                print!("{}", e.to_string());
+                // print!("{}", e.to_string());
                 let ret = e.evaluate();
-                println!("={}", ret);
+                // println!("={}", ret);
                 ret
             } else {
                 0
