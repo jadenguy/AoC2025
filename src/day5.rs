@@ -27,7 +27,7 @@ pub fn total_fresh_ids(db: &Database) -> usize {
     let normal_ranges = normalize_ranges(&db);
 
     for range in normal_ranges {
-        println!("{} to {}", range.0, range.1);
+        // println!("{}-{} {} ids", range.0, range.1, range.1 - range.0 + 1);
         // for n in range.0..=range.1 {
         //     count += 1;
         // }
@@ -48,21 +48,21 @@ fn normalize_ranges(db: &Database) -> Vec<Range> {
         let a = x[i];
         let b = x[i + 1];
         if a.1 >= b.1 {
-            println!("first {}-{} overlaps second {}-{}", a.0, a.1, b.0, b.1);
+            // println!("first {}-{} overlaps second {}-{}", a.0, a.1, b.0, b.1);
             x.remove(i + 1);
         } else if a.1 >= b.0 {
-            println!(
-                "first {}-{} combines with second {}-{}, now {}-{}",
-                a.0, a.1, b.0, b.1, a.0, b.1
-            );
+            // println!(
+            //     "first {}-{} combines with second {}-{}, now {}-{}",
+            //     a.0, a.1, b.0, b.1, a.0, b.1
+            // );
 
             x[i] = (a.0, b.1);
             x.remove(i + 1);
         } else {
-            println!(
-                "range {}-{} not in contact with range {}-{}",
-                a.0, a.1, b.0, b.1
-            );
+            // println!(
+            //     "range {}-{} not in contact with range {}-{}",
+            //     a.0, a.1, b.0, b.1
+            // );
             i += 1;
         }
     }
