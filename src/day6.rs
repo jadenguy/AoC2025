@@ -1,5 +1,32 @@
+use std::vec;
+
 pub fn convert_worksheet_to_problems(data: Vec<String>) -> Vec<Vec<String>> {
-    todo!()
+    let vec2d: Vec<Vec<String>> = data
+        .iter()
+        .map(|x| {
+            x.split_whitespace()
+                .filter(|x| !x.is_empty())
+                .map(|x| x.to_string())
+                .collect()
+        })
+        .collect();
+    let row_count = vec2d.len();
+    let col_count = vec2d[0].len();
+    let mut ret: Vec<Vec<String>> = Vec::new();
+    for col_num in 0..col_count {
+        let column = get_column(&vec2d, row_count, col_num);
+        ret.push(column);
+    }
+    ret
+}
+
+fn get_column(vec2d: &Vec<Vec<String>>, row_count: usize, col_num: usize) -> Vec<String> {
+    let mut column: Vec<String> = Vec::new();
+    for row_num in 0..row_count {
+        let value: String = (*vec2d[row_num][col_num]).to_string();
+        column.push(value)
+    }
+    column
 }
 pub fn generate_ast_from_problem(data: Vec<String>) -> Option<Expression> {
     let tokens: Vec<Token> = data
