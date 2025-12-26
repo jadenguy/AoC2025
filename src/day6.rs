@@ -11,7 +11,9 @@ pub fn convert_worksheet_to_problems_cephalopod(data: &Vec<String>) -> Vec<Vec<S
             let x = data[r].to_owned();
             col = format!("{}{}", col, x.chars().nth(c).unwrap());
         }
-        current_prob.push(col);
+        println!();
+        if (!col.trim().is_empty())
+        {current_prob.push(col.trim().to_string());}
         if !x.is_whitespace() {
             ret.push(current_prob);
             current_prob = Vec::new();
