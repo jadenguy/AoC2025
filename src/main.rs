@@ -1,5 +1,7 @@
 pub mod common;
-use aoc2025::day4::find_isolated_rolls_with_output;
+use aoc2025::{
+    day4::find_isolated_rolls_with_output, day6::convert_worksheet_to_problems_cephalopod,
+};
 use common::read_lines;
 use std::env;
 fn main() {
@@ -155,13 +157,21 @@ fn run_day6() {
         actual_sum_of_eval
     );
 
-    let problems = convert_worksheet_to_problems(&worksheet);
+    let problems = convert_worksheet_to_problems_cephalopod(&worksheet);
     let actual_sum_of_eval: i64 = problems
         .iter()
         .map(|problem| {
-            generate_ast_from_problem(problem.to_owned())
-                .unwrap()
-                .evaluate()
+            println!("{}", problem.join("\n"));
+            println!();
+            let ast = generate_ast_from_problem(problem.to_owned());
+            if let Some(e) = ast {
+                print!("{}", e.to_string());
+                let ret = e.evaluate();
+                println!("={}", ret);
+                ret
+            } else {
+                0
+            }
         })
         .sum();
     println!(

@@ -1,20 +1,29 @@
 pub fn convert_worksheet_to_problems_cephalopod(data: &Vec<String>) -> Vec<Vec<String>> {
     let last = data.last().unwrap();
+    let len = last.len();
     let mut op_row = last.chars().rev();
     let mut ret: Vec<Vec<String>> = Vec::new();
     let mut current_prob: Vec<String> = Vec::new();
 
-    for c in 0..last.len() {
-        let x = op_row.next().unwrap();
+    for col_num in 0..len {
+        let col_index = len - col_num - 1;
+        let char = op_row.next().unwrap();
         let mut col = String::from("");
-        for r in 0..(data.len() - 1) {
-            let x = data[r].to_owned();
-            col = format!("{}{}", col, x.chars().nth(c).unwrap());
+        for row_index in 0..(data.len() - 1) {
+            let row = data[row_index].to_owned();
+            let ch = row.chars().nth(col_index).unwrap();
+
+            col = format!("{}{}", col, ch);
         }
-        println!();
-        if (!col.trim().is_empty())
-        {current_prob.push(col.trim().to_string());}
-        if !x.is_whitespace() {
+        if !col.trim().is_empty() {
+            current_prob.push(col.trim().to_string());
+            // println!("{}", col)
+        }
+        if !char.is_whitespace() {
+            let op = last.chars().nth(col_index).unwrap();
+            // println!("{}", op);
+            // println!();
+            current_prob.push(op.to_string());
             ret.push(current_prob);
             current_prob = Vec::new();
         }
@@ -50,6 +59,11 @@ fn get_column(vec2d: &Vec<Vec<String>>, row_count: usize, col_num: usize) -> Vec
     column
 }
 pub fn generate_ast_from_problem(data: Vec<String>) -> Option<Expression> {
+    if data.len() < 3 {
+        let n = format!("{}", data.join("\n"));
+        println!("{}", n);
+        return None;
+    }
     let tokens: Vec<Token> = data
         .iter()
         .map(|line| Token::from_string(&line).unwrap())
@@ -118,6 +132,15 @@ impl Expression {
             Expression::Subtract(a, b) => a.evaluate() - b.evaluate(),
             Expression::Multiply(a, b) => a.evaluate() * b.evaluate(),
             Expression::Divide(a, b) => a.evaluate() / b.evaluate(),
+        }
+    }
+    pub fn to_string(&self) -> String {
+        match self {
+            Expression::Value(v) => format!("{}", *v),
+            Expression::Add(a, b) => format!("{}+{}", a.to_string(), b.to_string()),
+            Expression::Subtract(a, b) => format!("{}-{}", a.to_string(), b.to_string()),
+            Expression::Multiply(a, b) => format!("{}*{}", a.to_string(), b.to_string()),
+            Expression::Divide(a, b) => format!("{}/{}", a.to_string(), b.to_string()),
         }
     }
 }
