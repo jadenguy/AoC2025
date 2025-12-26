@@ -137,7 +137,23 @@ fn run_day5() {
     println!("Day 5 Part 2: All fresh IDs possible {}", id_count);
 }
 fn run_day6() {
-    println!("Running day 6 logic");
+    use aoc2025::day6::{convert_worksheet_to_problems, generate_ast_from_problem};
+
+    let worksheet = read_lines("./data/day6/part1.txt").expect("Failed to read lines from file");
+
+    let problems = convert_worksheet_to_problems(worksheet);
+    let actual_sum_of_eval: i64 = problems
+        .iter()
+        .map(|problem| {
+            generate_ast_from_problem(problem.to_owned())
+                .unwrap()
+                .evaluate()
+        })
+        .sum();
+    println!(
+        "Day 6 Part 1: Worksheet sum of problems {}",
+        actual_sum_of_eval
+    );
 }
 fn run_day7() {
     println!("Running day 7 logic");
