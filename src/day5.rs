@@ -23,7 +23,17 @@ pub fn parse_db(lines: Vec<&str>) -> Database {
 }
 
 pub fn count_fresh_ingredients(db: Database) -> usize {
-    todo!()
+    let mut count = 0;
+    for availabe in db.available_ingredient_ids {
+        if db
+            .fresh_ingredient_id_ranges
+            .iter()
+            .any(|r| availabe >= r.0 && availabe <= r.1)
+        {
+            count += 1;
+        }
+    }
+    count
 }
 #[derive(Debug, Clone, Eq, PartialEq, Hash, PartialOrd, Ord)]
 pub struct Database {
