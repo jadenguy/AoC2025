@@ -20,7 +20,7 @@ mod tests {
         let db = parse_db(lines);
         let expected_valid_id_count = 3;
         // act
-        let fresh_ingredient_count: usize = count_fresh_ingredients(db);
+        let fresh_ingredient_count: usize = count_fresh_ingredients(&db);
         // assert
         assert_eq!(fresh_ingredient_count, expected_valid_id_count)
     }
@@ -31,7 +31,7 @@ mod tests {
         let db = parse_db(lines);
         let expected_total_ids = 14;
         // act
-        let total_ids: usize = total_fresh_ids(db);
+        let total_ids: usize = total_fresh_ids(&db);
         // assert
         assert_eq!(total_ids, expected_total_ids)
     }

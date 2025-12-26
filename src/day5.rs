@@ -22,38 +22,59 @@ pub fn parse_db(lines: Vec<String>) -> Database {
     }
 }
 
-pub fn total_fresh_ids(db: Database) -> usize {
+pub fn total_fresh_ids(db: &Database) -> usize {
     let mut count = 0;
-    let normal_ranges = normalize_ranges(db);
+    let normal_ranges = normalize_ranges(&db);
+
     for range in normal_ranges {
-        count += range.1 - range.0
+        println!("{} to {}", range.0, range.1);
+        // for n in range.0..=range.1 {
+        //     count += 1;
+        // }
+        count += range.1 - range.0 + 1;
     }
     count
 }
 
-fn normalize_ranges(db: Database) -> Vec<Range> {
-    let mut x = db.fresh_ingredient_id_ranges;
+fn normalize_ranges(db: &Database) -> Vec<Range> {
+    let mut x: Vec<Range> = db
+        .fresh_ingredient_id_ranges
+        .iter()
+        .map(|x| x.to_owned())
+        .collect();
     x.sort();
     let mut i = 0;
     while i < x.len() - 1 {
         let a = x[i];
         let b = x[i + 1];
-        if a.1 <= b.0 {
-            x.remove(i);
-            x.remove(i);
-            x.insert(i, (a.0, b.1));
-            i = 0;
+        if a.1 >= b.1 {
+            println!("first {}-{} overlaps second {}-{}", a.0, a.1, b.0, b.1);
+            x.remove(i + 1);
+        } else if a.1 >= b.0 {
+            println!(
+                "first {}-{} combines with second {}-{}, now {}-{}",
+                a.0, a.1, b.0, b.1, a.0, b.1
+            );
+
+            x[i] = (a.0, b.1);
+            x.remove(i + 1);
+        } else {
+            println!(
+                "range {}-{} not in contact with range {}-{}",
+                a.0, a.1, b.0, b.1
+            );
+            i += 1;
         }
     }
     x
 }
-pub fn count_fresh_ingredients(db: Database) -> usize {
+pub fn count_fresh_ingredients(db: &Database) -> usize {
     let mut count = 0;
-    for availabe in db.available_ingredient_ids {
+    for availabe in &db.available_ingredient_ids {
         if db
             .fresh_ingredient_id_ranges
             .iter()
-            .any(|r| availabe >= r.0 && availabe <= r.1)
+            .any(|r| availabe >= &r.0 && availabe <= &r.1)
         {
             count += 1;
         }
