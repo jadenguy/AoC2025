@@ -1,6 +1,25 @@
-use std::vec;
+pub fn convert_worksheet_to_problems_cephalopod(data: &Vec<String>) -> Vec<Vec<String>> {
+    let last = data.last().unwrap();
+    let mut op_row = last.chars().rev();
+    let mut ret: Vec<Vec<String>> = Vec::new();
+    let mut current_prob: Vec<String> = Vec::new();
 
-pub fn convert_worksheet_to_problems(data: Vec<String>) -> Vec<Vec<String>> {
+    for c in 0..last.len() {
+        let x = op_row.next().unwrap();
+        let mut col = String::from("");
+        for r in 0..(data.len() - 1) {
+            let x = data[r].to_owned();
+            col = format!("{}{}", col, x.chars().nth(c).unwrap());
+        }
+        current_prob.push(col);
+        if !x.is_whitespace() {
+            ret.push(current_prob);
+            current_prob = Vec::new();
+        }
+    }
+    ret
+}
+pub fn convert_worksheet_to_problems(data: &Vec<String>) -> Vec<Vec<String>> {
     let vec2d: Vec<Vec<String>> = data
         .iter()
         .map(|x| {

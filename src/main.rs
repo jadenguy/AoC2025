@@ -141,7 +141,7 @@ fn run_day6() {
 
     let worksheet = read_lines("./data/day6/part1.txt").expect("Failed to read lines from file");
 
-    let problems = convert_worksheet_to_problems(worksheet);
+    let problems = convert_worksheet_to_problems(&worksheet);
     let actual_sum_of_eval: i64 = problems
         .iter()
         .map(|problem| {
@@ -152,6 +152,20 @@ fn run_day6() {
         .sum();
     println!(
         "Day 6 Part 1: Worksheet sum of problems {}",
+        actual_sum_of_eval
+    );
+
+    let problems = convert_worksheet_to_problems(&worksheet);
+    let actual_sum_of_eval: i64 = problems
+        .iter()
+        .map(|problem| {
+            generate_ast_from_problem(problem.to_owned())
+                .unwrap()
+                .evaluate()
+        })
+        .sum();
+    println!(
+        "Day 6 Part 2: Worksheet sum of problems cephalopod style {}",
         actual_sum_of_eval
     );
 }
