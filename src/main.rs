@@ -128,7 +128,12 @@ fn run_day4() {
 }
 
 fn run_day5() {
-    println!("Running day 5 logic");
+    use aoc2025::day5::{count_fresh_ingredients, parse_db, total_fresh_ids};
+    let db_file = read_lines("./data/day5/part1.txt").expect("Failed to read lines from file");
+    let db = parse_db(db_file);
+    let ingredient_count = count_fresh_ingredients(db);
+    println!("Day 5 Part 1: Fresh ingredient count {}", ingredient_count);
+    let ingredient_count = total_fresh_ids(db);
 }
 fn run_day6() {
     println!("Running day 6 logic");

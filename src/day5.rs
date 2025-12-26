@@ -1,9 +1,9 @@
-pub fn parse_db(lines: Vec<&str>) -> Database {
-    let mut ranges: Vec<(u8, u8)> = vec![];
-    let mut available: Vec<u8> = vec![];
+type Range = (usize, usize);
+pub fn parse_db(lines: Vec<String>) -> Database {
+    let mut ranges: Vec<Range> = vec![];
+    let mut available: Vec<usize> = vec![];
     let mut adding_ranges = true;
     for line in lines {
-        println!("{}", line);
         if line == "" {
             adding_ranges = false;
         } else if adding_ranges {
@@ -22,6 +22,31 @@ pub fn parse_db(lines: Vec<&str>) -> Database {
     }
 }
 
+pub fn total_fresh_ids(db: Database) -> usize {
+    let mut count = 0;
+    let normal_ranges = normalize_ranges(db);
+    for range in normal_ranges {
+        count += range.1 - range.0
+    }
+    count
+}
+
+fn normalize_ranges(db: Database) -> Vec<Range> {
+    let mut x = db.fresh_ingredient_id_ranges;
+    x.sort();
+    let mut i = 0;
+    while i < x.len() - 1 {
+        let a = x[i];
+        let b = x[i + 1];
+        if a.1 <= b.0 {
+            x.remove(i);
+            x.remove(i);
+            x.insert(i, (a.0, b.1));
+            i = 0;
+        }
+    }
+    x
+}
 pub fn count_fresh_ingredients(db: Database) -> usize {
     let mut count = 0;
     for availabe in db.available_ingredient_ids {
@@ -37,6 +62,6 @@ pub fn count_fresh_ingredients(db: Database) -> usize {
 }
 #[derive(Debug, Clone, Eq, PartialEq, Hash, PartialOrd, Ord)]
 pub struct Database {
-    pub fresh_ingredient_id_ranges: Vec<(u8, u8)>,
-    pub available_ingredient_ids: Vec<u8>,
+    pub fresh_ingredient_id_ranges: Vec<Range>,
+    pub available_ingredient_ids: Vec<usize>,
 }
