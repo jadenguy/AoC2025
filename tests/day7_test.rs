@@ -9,17 +9,9 @@ mod tests {
         // act
         let actual_manifold = parse_manifold_strings(sample_data);
         // assert
-        let start: (i32, i32) = *actual_manifold
-            .iter()
-            .find(|(_, val)| **val == 'S')
-            .unwrap()
-            .0;
-        let split: Vec<(i32, i32)> = actual_manifold
-            .iter()
-            .filter(|(_, v)| **v == '^')
-            .map(|(&k, _)| k)
-            .collect();
-        assert_eq!(start, (0, 7));
+        let first_emitter: (i32, i32) = *actual_manifold.emitters.keys().nth(0).unwrap();
+        let split: Vec<(i32, i32)> = actual_manifold.splitters.iter().map(|(&k, _)| k).collect();
+        assert_eq!(first_emitter, (0, 7));
         assert!(split.iter().any(|&x| x == (2, 7)));
     }
     #[test]
