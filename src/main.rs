@@ -180,7 +180,14 @@ fn run_day6() {
     );
 }
 fn run_day7() {
-    println!("Running day 7 logic");
+    use aoc2025::day7::parse_manifold_strings;
+    use aoc2025::day7::process_manifold;
+    let manifold_initial_state =
+        read_lines("./data/day7/part1.txt").expect("Failed to read lines from file");
+    let manifold =
+        parse_manifold_strings(manifold_initial_state.iter().map(|s| s.as_str()).collect());
+    let x = process_manifold(manifold);
+    println!("Day 7 Part 1: Manifold beam splits {}", x.1);
 }
 fn run_day8() {
     println!("Running day 8 logic");

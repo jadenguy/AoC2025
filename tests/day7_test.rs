@@ -2,7 +2,7 @@
 mod tests {
     use std::collections::HashSet;
 
-    use aoc2025::day7::{parse_manifold_strings, process_manifold_with_gravity};
+    use aoc2025::day7::{parse_manifold_strings, process_manifold};
 
     #[test]
     fn test_parse_manifold_strings() {
@@ -48,9 +48,19 @@ mod tests {
         let sample_data = sample_data();
         let actual_manifold = parse_manifold_strings(sample_data);
         // act
-        let processed_output = process_manifold_with_gravity(actual_manifold).1;
+        let processed_output = process_manifold(actual_manifold).1;
         // assert
         assert_eq!(processed_output, 21);
+    }
+    #[test]
+    fn test_process_quantum_manifold() {
+        // arrange
+        let sample_data = sample_data();
+        let actual_manifold = parse_manifold_strings(sample_data);
+        // act
+        let processed_output = process_manifold(actual_manifold).1;
+        // assert
+        assert_eq!(processed_output, 40);
     }
     fn sample_data() -> Vec<&'static str> {
         r#".......S.......

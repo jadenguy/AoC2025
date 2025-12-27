@@ -26,9 +26,10 @@ pub fn parse_manifold_strings(data: Vec<&str>) -> Manifold {
         height: height,
     }
 }
-pub fn process_manifold_with_gravity(manifold: Manifold) -> (Vec<Coordinate>, usize) {
+pub fn process_manifold(manifold: Manifold) -> (Vec<Coordinate>, usize, usize) {
     let mut beams: CoordinateSet = manifold.emitters.clone();
-    let mut split = 0;
+    let mut split = CoordinateSet::new();
+    let mut quantum_split = 0;
     let mut next_row = CoordinateSet::new();
     for row_num in 0..manifold.height {
         next_row = CoordinateSet::new();
@@ -38,7 +39,7 @@ pub fn process_manifold_with_gravity(manifold: Manifold) -> (Vec<Coordinate>, us
 
             if beams.contains(&coord) {
                 if manifold.splitters.contains(&coord_below) {
-                    split += 1;
+                    split.insert(coord);
                     if col_num > 0 {
                         next_row.insert((row_num + 1, col_num - 1));
                     }
@@ -56,7 +57,11 @@ pub fn process_manifold_with_gravity(manifold: Manifold) -> (Vec<Coordinate>, us
             }
         }
     }
-    (next_row.iter().map(|c| *c).collect(), split)
+    (
+        next_row.iter().map(|c| *c).collect(),
+        split.len(),
+        quantum_split,
+    )
 }
 pub struct Manifold {
     pub emitters: CoordinateSet,
