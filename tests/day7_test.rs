@@ -1,5 +1,7 @@
 #[cfg(test)]
 mod tests {
+    use std::collections::HashSet;
+
     use aoc2025::day7::{parse_manifold_strings, process_manifold};
 
     #[test]
@@ -10,9 +12,36 @@ mod tests {
         let actual_manifold = parse_manifold_strings(sample_data);
         // assert
         let first_emitter: (i32, i32) = *actual_manifold.emitters.keys().nth(0).unwrap();
-        let split: Vec<(i32, i32)> = actual_manifold.splitters.iter().map(|(&k, _)| k).collect();
+        let split: HashSet<(i32, i32)> =
+            actual_manifold.splitters.iter().map(|(&k, _)| k).collect();
         assert_eq!(first_emitter, (0, 7));
-        assert!(split.iter().any(|&x| x == (2, 7)));
+        assert_eq!(
+            split,
+            HashSet::from_iter([
+                (02, 07),
+                (04, 06),
+                (04, 08),
+                (06, 05),
+                (06, 07),
+                (06, 09),
+                (08, 04),
+                (08, 06),
+                (08, 10),
+                (10, 03),
+                (10, 05),
+                (10, 09),
+                (10, 11),
+                (12, 02),
+                (12, 06),
+                (12, 12),
+                (14, 01),
+                (14, 03),
+                (14, 05),
+                (14, 07),
+                (14, 09),
+                (14, 13),
+            ])
+        );
     }
     #[test]
     fn test_process_manifold() {
