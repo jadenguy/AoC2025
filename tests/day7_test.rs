@@ -2,7 +2,7 @@
 mod tests {
     use std::collections::HashSet;
 
-    use aoc2025::day7::{parse_manifold_strings, process_manifold};
+    use aoc2025::day7::{parse_manifold_strings, process_manifold_with_gravity};
 
     #[test]
     fn test_parse_manifold_strings() {
@@ -11,9 +11,8 @@ mod tests {
         // act
         let actual_manifold = parse_manifold_strings(sample_data);
         // assert
-        let first_emitter: (i32, i32) = *actual_manifold.emitters.keys().nth(0).unwrap();
-        let split: HashSet<(i32, i32)> =
-            actual_manifold.splitters.iter().map(|(&k, _)| k).collect();
+        let first_emitter: (usize, usize) = *actual_manifold.emitters.iter().nth(0).unwrap();
+        let split: HashSet<(usize, usize)> = actual_manifold.splitters;
         assert_eq!(first_emitter, (0, 7));
         assert_eq!(
             split,
@@ -49,7 +48,7 @@ mod tests {
         let sample_data = sample_data();
         let actual_manifold = parse_manifold_strings(sample_data);
         // act
-        let processed_output = process_manifold(actual_manifold).len();
+        let processed_output = process_manifold_with_gravity(actual_manifold).1;
         // assert
         assert_eq!(processed_output, 21);
     }
