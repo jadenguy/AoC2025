@@ -121,11 +121,11 @@ fn run_day4() {
         // let (max_row, max_col) = <(i32, i32)>::from(board.keys().max().unwrap());
         while found > 0 {
             let result = find_isolated_rolls_with_output(board);
+            // todo!("return the updated items and only look NEAR those positions");
             found = result.0;
             board = result.1;
 
             all_found += found;
-
             // print_board(&board, max_row, max_col);
         }
         println!("Day 4 Part 2: Isolated rolls count {}", all_found);
