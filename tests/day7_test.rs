@@ -48,7 +48,7 @@ mod tests {
         let sample_data = sample_data();
         let actual_manifold = parse_manifold_strings(sample_data);
         // act
-        let processed_output = process_manifold(actual_manifold).0;
+        let processed_output = process_manifold(&actual_manifold).0;
         // assert
         assert_eq!(processed_output, 21);
     }
@@ -58,7 +58,7 @@ mod tests {
         let sample_data = sample_data();
         let actual_manifold = parse_manifold_strings(sample_data);
         // act
-        let processed_output = process_manifold(actual_manifold).1;
+        let processed_output = process_manifold(&actual_manifold).1;
         // assert
         assert_eq!(processed_output, 40);
     }

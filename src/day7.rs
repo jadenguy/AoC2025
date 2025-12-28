@@ -26,7 +26,7 @@ pub fn parse_manifold_strings(data: Vec<&str>) -> Manifold {
         height: height,
     }
 }
-pub fn process_manifold(manifold: Manifold) -> (usize, usize) {
+pub fn process_manifold(manifold: &Manifold) -> (usize, usize) {
     let mut beam_paths: BeamCount =
         HashMap::from_iter(manifold.emitters.iter().map(|&e| (e, 1usize)));
     let mut splits_hit = CoordinateSet::new();

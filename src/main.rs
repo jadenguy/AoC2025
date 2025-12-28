@@ -24,7 +24,10 @@ fn main() {
                 "day10" => run_day10(),
                 "day11" => run_day11(),
                 "day12" => run_day12(),
-                _ => println!("Unknown day: {}", day),
+                _ => {
+                    println!("Unknown day: {}", day);
+                    run_all();
+                }
             }
         }
     }
@@ -186,8 +189,15 @@ fn run_day7() {
         read_lines("./data/day7/part1.txt").expect("Failed to read lines from file");
     let manifold =
         parse_manifold_strings(manifold_initial_state.iter().map(|s| s.as_str()).collect());
-    let x = process_manifold(manifold);
-    println!("Day 7 Part 1: Manifold beam splits {}", x.1);
+
+    println!(
+        "Day 7 Part 1: Manifold beam splits {}",
+        process_manifold(&manifold).0
+    );
+    println!(
+        "Day 7 Part 2: Manifold beam paths {}",
+        process_manifold(&manifold).1
+    );
 }
 fn run_day8() {
     println!("Running day 8 logic");
