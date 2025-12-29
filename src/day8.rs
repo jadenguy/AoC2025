@@ -53,6 +53,7 @@ pub fn connect_junction_boxes(
         }
         match (net_a, net_b) {
             (Some(i), Some(j)) if i == j => {
+                connections += 1;
                 println!("Boxes in one network")
             }
             (Some(i), Some(j)) => {
@@ -80,6 +81,15 @@ pub fn connect_junction_boxes(
                 panic!("the networks should have been seeded, it's impossible not to find them")
             }
         }
+    }
+    for net in networks.iter() {
+        println!(
+            "{}",
+            net.iter()
+                .map(|x| x.id.to_string())
+                .collect::<Vec<_>>()
+                .join("-")
+        )
     }
     networks
 }
