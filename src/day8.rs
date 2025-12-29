@@ -82,7 +82,7 @@ pub fn connect_junction_boxes(
         }
         connections += 1;
         if connections == connection_count {
-            println!("")
+            println!("");
             println!(" All connections exhausted.")
         }
     }
