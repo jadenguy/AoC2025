@@ -1,11 +1,13 @@
 use std::collections::HashSet;
-
-pub fn parse_junction_boxes(sample_data: Vec<&str>) -> Vec<Box> {
+type JunctionBoxen = (JunctionBox, JunctionBox);
+pub fn parse_junction_boxes(sample_data: Vec<&str>) -> Vec<JunctionBox> {
     sample_data
         .iter()
-        .map(|&r| {
+        .enumerate()
+        .map(|(i, &r)| {
             let mut itr = r.split(",");
-            Box {
+            JunctionBox {
+                id: (('a' as u8) + i as u8) as char,
                 x: itr.next().unwrap().parse().unwrap(),
                 y: itr.next().unwrap().parse().unwrap(),
                 z: itr.next().unwrap().parse().unwrap(),
@@ -13,13 +15,86 @@ pub fn parse_junction_boxes(sample_data: Vec<&str>) -> Vec<Box> {
         })
         .collect()
 }
-pub fn connect_junction_boxes(boxes: Vec<Box>, connections: usize) -> Vec<HashSet<Box>> {
-    vec![]
+pub fn connect_junction_boxes(
+    boxes: Vec<JunctionBox>,
+    connection_count: usize,
+) -> Vec<HashSet<JunctionBox>> {
+    let mut distances: Vec<(JunctionBoxen, i32)> = Vec::new();
+    let mut networks: Vec<HashSet<JunctionBox>> = boxes
+        .iter()
+        .map(|b| HashSet::from_iter([b.clone()]))
+        .collect();
+    for first_box_index in 0..boxes.len() {
+        let a = &boxes[first_box_index];
+        println!("{}: {},{},{}", a.id, a.x, a.y, a.z);
+        for second_box_index in (first_box_index + 1)..boxes.len() {
+            let b = &boxes[second_box_index];
+            distances.push(((a.clone(), b.clone()), a.distance_to_box(b)));
+        }
+    }
+    distances.sort_by_key(|x| x.1);
+
+    let mut connections = 0;
+    for ((a, b), dist) in distances {
+        print!("{} to {} is sqrt({}); ", a.id, b.id, dist);
+        if connections >= connection_count {
+            println!("all junctions connected.");
+            continue;
+        }
+        let mut net_a = None;
+        let mut net_b = None;
+        for (idx, net) in networks.iter().enumerate() {
+            if net.contains(&a) {
+                net_a = Some(idx);
+            }
+            if net.contains(&b) {
+                net_b = Some(idx);
+            }
+        }
+        match (net_a, net_b) {
+            (Some(i), Some(j)) if i == j => {
+                println!("Boxes in one network")
+            }
+            (Some(i), Some(j)) => {
+                print!(
+                    "Combining network containing {} and ",
+                    networks[i]
+                        .iter()
+                        .map(|x| x.id.to_string())
+                        .collect::<Vec<_>>()
+                        .join("-")
+                );
+                let other = networks.remove(j);
+                println!(
+                    "network containing {}.",
+                    other
+                        .iter()
+                        .map(|x| x.id.to_string())
+                        .collect::<Vec<_>>()
+                        .join("-")
+                );
+                networks[i].extend(other);
+                connections += 1;
+            }
+            _ => {
+                panic!("the networks should have been seeded, it's impossible not to find them")
+            }
+        }
+    }
+    networks
 }
 
 #[derive(Debug, Clone, Eq, PartialEq, Hash, PartialOrd, Ord)]
-pub struct Box {
+pub struct JunctionBox {
+    pub id: char,
     pub x: i32,
     pub y: i32,
     pub z: i32,
+}
+impl JunctionBox {
+    fn distance_to_box(&self, other: &JunctionBox) -> i32 {
+        (self.x - other.x) * (self.x - other.x)
+            + (self.y - other.y) * (self.y - other.y)
+            + (self.z - other.z) * (self.z - other.z)
+    }
 }
