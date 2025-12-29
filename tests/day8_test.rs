@@ -1,7 +1,5 @@
 #[cfg(test)]
 mod tests {
-    use std::collections::HashSet;
-
     use aoc2025::day8::JunctionBox;
     use aoc2025::day8::connect_junction_boxes;
     use aoc2025::day8::parse_junction_boxes;
@@ -10,10 +8,10 @@ mod tests {
     fn test_parse_manifold_strings() {
         // arrange
         let sample_data = sample_data();
-        let actual_manifold = parse_junction_boxes(sample_data);
+        let junction_boxes = parse_junction_boxes(sample_data);
         // act
-        let actual_junctions = connect_junction_boxes(actual_manifold, 10);
-        let mut sizes: Vec<usize> = actual_junctions.iter().map(|x| x.len()).collect();
+        let junction_networks = connect_junction_boxes(junction_boxes, 10);
+        let mut sizes: Vec<usize> = junction_networks.iter().map(|x| x.len()).collect();
         sizes.sort();
         let product_of_three_longest: usize = sizes.iter().rev().take(3).product();
         // assert
@@ -24,133 +22,132 @@ mod tests {
     fn test_parse_junction_boxes() {
         // arrange
         let sample_data = sample_data();
-        let expected: HashSet<JunctionBox> = HashSet::from_iter([
+        let expected = [
             JunctionBox {
-                id: 'a',
+                id: 0,
                 x: 162,
                 y: 817,
                 z: 812,
             },
             JunctionBox {
-                id: 'b',
+                id: 1,
                 x: 57,
                 y: 618,
                 z: 57,
             },
             JunctionBox {
-                id: 'c',
+                id: 2,
                 x: 906,
                 y: 360,
                 z: 560,
             },
             JunctionBox {
-                id: 'd',
+                id: 3,
                 x: 592,
                 y: 479,
                 z: 940,
             },
             JunctionBox {
-                id: 'e',
+                id: 4,
                 x: 352,
                 y: 342,
                 z: 300,
             },
             JunctionBox {
-                id: 'f',
+                id: 5,
                 x: 466,
                 y: 668,
                 z: 158,
             },
             JunctionBox {
-                id: 'g',
+                id: 6,
                 x: 542,
                 y: 29,
                 z: 236,
             },
             JunctionBox {
-                id: 'h',
+                id: 7,
                 x: 431,
                 y: 825,
                 z: 988,
             },
             JunctionBox {
-                id: 'i',
+                id: 8,
                 x: 739,
                 y: 650,
                 z: 466,
             },
             JunctionBox {
-                id: 'j',
+                id: 9,
                 x: 52,
                 y: 470,
                 z: 668,
             },
             JunctionBox {
-                id: 'k',
+                id: 10,
                 x: 216,
                 y: 146,
                 z: 977,
             },
             JunctionBox {
-                id: 'l',
+                id: 11,
                 x: 819,
                 y: 987,
                 z: 18,
             },
             JunctionBox {
-                id: 'm',
+                id: 12,
                 x: 117,
                 y: 168,
                 z: 530,
             },
             JunctionBox {
-                id: 'n',
+                id: 13,
                 x: 805,
                 y: 96,
                 z: 715,
             },
             JunctionBox {
-                id: 'o',
+                id: 14,
                 x: 346,
                 y: 949,
                 z: 466,
             },
             JunctionBox {
-                id: 'p',
+                id: 15,
                 x: 970,
                 y: 615,
                 z: 88,
             },
             JunctionBox {
-                id: 'q',
+                id: 16,
                 x: 941,
                 y: 993,
                 z: 340,
             },
             JunctionBox {
-                id: 'r',
+                id: 17,
                 x: 862,
                 y: 61,
                 z: 35,
             },
             JunctionBox {
-                id: 's',
+                id: 18,
                 x: 984,
                 y: 92,
                 z: 344,
             },
             JunctionBox {
-                id: 't',
+                id: 19,
                 x: 425,
                 y: 690,
                 z: 689,
             },
-        ]);
+        ];
         // act
-        let actual_manifold: HashSet<JunctionBox> =
-            HashSet::from_iter(parse_junction_boxes(sample_data));
+        let junction_boxes = parse_junction_boxes(sample_data);
         // assert
-        assert_eq!(actual_manifold, expected);
+        assert_eq!(junction_boxes, expected);
     }
     fn sample_data() -> Vec<&'static str> {
         r#"162,817,812
