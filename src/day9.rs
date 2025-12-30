@@ -1,4 +1,4 @@
-pub fn furthest_tiles(tiles: Vec<Coordinate>) -> Option<(Coordinate, Coordinate, i64)> {
+pub fn furthest_tiles(tiles: &Vec<Coordinate>) -> Option<(Coordinate, Coordinate, i64)> {
     let mut pairwise_areas: Vec<(Coordinate, Coordinate, i64)> = Vec::new();
     for first in 0..tiles.len() {
         let a = tiles[first];
