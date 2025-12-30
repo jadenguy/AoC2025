@@ -11,7 +11,7 @@ mod tests {
         let sample_data = sample_data();
         let junction_boxes = parse_junction_boxes(sample_data);
         // act
-        let networks = connect_junction_boxes_n_times(junction_boxes, 10);
+        let networks = connect_junction_boxes_n_times(&junction_boxes, 10);
         let mut sizes: Vec<usize> = networks.iter().map(|x| x.len()).collect();
         sizes.sort();
         let product_of_three_longest: usize = sizes.iter().rev().take(3).product();
@@ -24,7 +24,7 @@ mod tests {
         let sample_data = sample_data();
         let junction_boxes = parse_junction_boxes(sample_data);
         // act
-        let networks = connect_junction_boxes_to_exhaustion(junction_boxes);
+        let networks = connect_junction_boxes_to_exhaustion(&junction_boxes);
 
         // assert
         assert_eq!(networks.0.x * networks.1.x, 25272)

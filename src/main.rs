@@ -1,6 +1,7 @@
 pub mod common;
 use aoc2025::{
     day4::find_isolated_rolls_with_output, day6::convert_worksheet_to_problems_cephalopod,
+    day8::connect_junction_boxes_to_exhaustion,
 };
 use common::read_lines;
 use std::env;
@@ -199,13 +200,18 @@ fn run_day8() {
     let jbox: Vec<&str> = junction_box_strings.iter().map(|l| l.as_str()).collect();
     let junction_boxes = parse_junction_boxes(jbox);
 
-    let junction_networks = connect_junction_boxes_n_times(junction_boxes, 1000);
+    let junction_networks = connect_junction_boxes_n_times(&junction_boxes, 1000);
     let mut sizes: Vec<usize> = junction_networks.iter().map(|x| x.len()).collect();
     sizes.sort_by_key(|&k| -1 * (k as i64));
     let product_of_three_longest: usize = sizes.iter().take(3).product();
     println!(
-        "Day 8 Part 1: largest networks product {} *{} * {} ={}",
-        sizes[0], sizes[1], sizes[2], product_of_three_longest
+        "Day 8 Part 1: largest networks product  {}",
+        product_of_three_longest
+    );
+    let last_connection = connect_junction_boxes_to_exhaustion(&junction_boxes);
+    println!(
+        "Day 8 Part 2: last connection x coord product  {}",
+        last_connection.0.x * last_connection.1.x
     );
 }
 fn run_day9() {

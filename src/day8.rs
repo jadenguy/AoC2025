@@ -16,16 +16,16 @@ pub fn parse_junction_boxes(sample_data: Vec<&str>) -> Vec<JunctionBox> {
         .collect()
 }
 pub fn connect_junction_boxes_n_times(
-    boxes: Vec<JunctionBox>,
+    boxes: &Vec<JunctionBox>,
     wanted_connections: i64,
 ) -> Vec<HashSet<JunctionBox>> {
-    connect_junction_boxes(boxes, wanted_connections).0
+    connect_junction_boxes(&boxes, wanted_connections).0
 }
-pub fn connect_junction_boxes_to_exhaustion(boxes: Vec<JunctionBox>) -> JunctionBoxen {
-    connect_junction_boxes(boxes, -1).1
+pub fn connect_junction_boxes_to_exhaustion(boxes: &Vec<JunctionBox>) -> JunctionBoxen {
+    connect_junction_boxes(&boxes, -1).1
 }
 fn connect_junction_boxes(
-    boxes: Vec<JunctionBox>,
+    boxes: &Vec<JunctionBox>,
     wanted_connections: i64,
 ) -> (Vec<HashSet<JunctionBox>>, JunctionBoxen) {
     let mut distances: Vec<(JunctionBoxen, i64)> = Vec::new();
