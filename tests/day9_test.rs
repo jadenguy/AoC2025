@@ -9,7 +9,7 @@ fn test_furthest_tiles() {
     let expected: HashSet<Coordinate> =
         HashSet::from_iter([Coordinate { x: 11, y: 1 }, Coordinate { x: 2, y: 5 }]);
     // act
-    let (a, b, area) = furthest_tiles(tiles).expect("returned none but should have returned some");
+    let (a, b, area) = furthest_tiles(&tiles).expect("returned none but should have returned some");
     // assert
     assert_eq!(HashSet::from_iter([a, b]), expected);
     assert_eq!(area, 50)
