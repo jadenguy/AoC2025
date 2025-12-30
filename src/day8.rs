@@ -78,20 +78,6 @@ pub fn connect_junction_boxes_n_times(
                     (i, j) = (j, i)
                 }
                 let other = networks.remove(j);
-<<<<<<< Updated upstream
-<<<<<<< Updated upstream
-                println!(
-                    "network containing {}.",
-                    other
-                        .iter()
-                        .map(|x| x.id.to_string())
-                        .collect::<Vec<_>>()
-                        .join("-")
-                );
-                // todo!("make sure i and j are ordered");
-=======
-=======
->>>>>>> Stashed changes
                 // println!(
                 //     "network containing {}.",
                 //     other
@@ -101,10 +87,6 @@ pub fn connect_junction_boxes_n_times(
                 //         .join("-")
                 // );
                 // println!();
-<<<<<<< Updated upstream
->>>>>>> Stashed changes
-=======
->>>>>>> Stashed changes
                 networks[i].extend(other);
             }
             _ => {
