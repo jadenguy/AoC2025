@@ -1,3 +1,35 @@
+use std::collections::HashSet;
+
+pub fn furthest_red_green_tiles(tiles: &Vec<Coordinate>) -> Option<(Coordinate, Coordinate, i64)> {
+    let len = tiles.len();
+    let mut red_green: HashSet<Coordinate> = HashSet::new();
+    for a_index in 0..len {
+        let a = tiles[a_index];
+        let var_name = match a_index {
+            b if b == len - 1 => 0,
+            b => b + 1,
+        };
+        let b = tiles[var_name];
+        let ax = a.x;
+        let bx = b.x;
+        let ay = a.y;
+        let by = b.y;
+        for x in ax..=bx {
+            red_green.insert(Coordinate { x: x, y: ay });
+        }
+        for x in bx..=ax {
+            red_green.insert(Coordinate { x: x, y: ay });
+        }
+        for y in ay..=by {
+            red_green.insert(Coordinate { x: ax, y: y });
+        }
+        for y in by..=ay {
+            red_green.insert(Coordinate { x: ax, y: y });
+        }
+    }
+    println!("{}", red_green.len());
+    None
+}
 pub fn furthest_tiles(tiles: &Vec<Coordinate>) -> Option<(Coordinate, Coordinate, i64)> {
     let mut pairwise_areas: Vec<(Coordinate, Coordinate, i64)> = Vec::new();
     for first in 0..tiles.len() {

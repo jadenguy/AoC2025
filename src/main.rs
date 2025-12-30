@@ -215,16 +215,16 @@ fn run_day8() {
     );
 }
 fn run_day9() {
-    use aoc2025::day9::{furthest_tiles, parse_tiles};
+    use aoc2025::day9::{furthest_red_green_tiles, furthest_tiles, parse_tiles};
     let tile_string = read_lines("./data/day9/part1.txt").expect("Failed to read lines from file");
     let tiles = parse_tiles(tile_string.iter().map(|x| x.as_str()).collect());
 
-    let (a, b, area) = furthest_tiles(&tiles).expect("returned none but should have returned some");
-
-    println!(
-        "Day 9 Part 1: {},{} to {},{} area {}",
-        a.x, a.y, b.x, b.y, area
-    );
+    let (_a, _b, area) =
+        furthest_tiles(&tiles).expect("returned none but should have returned some");
+    println!("Day 9 Part 1: Largest rectangle area {}", area);
+    let (_a, _b, area) =
+        furthest_red_green_tiles(&tiles).expect("returned none but should have returned some");
+    println!("Day 9 Part 2: Largest red/green rectangle area {}", area);
 }
 fn run_day10() {
     println!("Running day 10 logic");
