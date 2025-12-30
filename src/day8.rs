@@ -17,8 +17,17 @@ pub fn parse_junction_boxes(sample_data: Vec<&str>) -> Vec<JunctionBox> {
 }
 pub fn connect_junction_boxes_n_times(
     boxes: Vec<JunctionBox>,
-    connection_count: i64,
+    wanted_connections: i64,
 ) -> Vec<HashSet<JunctionBox>> {
+    connect_junction_boxes(boxes, wanted_connections).0
+}
+pub fn connect_junction_boxes_to_exhaustion(boxes: Vec<JunctionBox>) -> JunctionBoxen {
+    connect_junction_boxes(boxes, -1).1
+}
+fn connect_junction_boxes(
+    boxes: Vec<JunctionBox>,
+    wanted_connections: i64,
+) -> (Vec<HashSet<JunctionBox>>, JunctionBoxen) {
     let mut distances: Vec<(JunctionBoxen, i64)> = Vec::new();
     let mut networks: Vec<HashSet<JunctionBox>> = boxes
         .iter()
@@ -35,12 +44,13 @@ pub fn connect_junction_boxes_n_times(
     }
     distances.sort_by_key(|x| x.1);
     // println!("{} pairwise distances found", distances.len());
-    let mut connections = 0;
+    let mut connection_count = 0;
+    let mut last: Option<JunctionBoxen> = None;
     for ((a, b), _distance) in distances {
         if networks.len() == 1 {
             continue;
         }
-        if connections == connection_count && connection_count > 0 {
+        if connection_count == wanted_connections && wanted_connections > 0 {
             continue;
         }
         // print!("  ");
@@ -93,8 +103,9 @@ pub fn connect_junction_boxes_n_times(
                 panic!("the networks should have been seeded, it's impossible not to find them")
             }
         }
-        connections += 1;
-        if connections == connection_count {
+        last = Some((a, b));
+        connection_count += 1;
+        if connection_count == wanted_connections {
             // println!("");
             // println!(" All connections exhausted.")
         }
@@ -112,7 +123,7 @@ pub fn connect_junction_boxes_n_times(
     //         .join("-")
     // )
     // }
-    networks
+    (networks, last.unwrap())
 }
 
 #[derive(Debug, Clone, Eq, PartialEq, Hash, PartialOrd, Ord)]

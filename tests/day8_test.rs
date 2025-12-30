@@ -2,6 +2,7 @@
 mod tests {
     use aoc2025::day8::JunctionBox;
     use aoc2025::day8::connect_junction_boxes_n_times;
+    use aoc2025::day8::connect_junction_boxes_to_exhaustion;
     use aoc2025::day8::parse_junction_boxes;
 
     #[test]
@@ -10,12 +11,23 @@ mod tests {
         let sample_data = sample_data();
         let junction_boxes = parse_junction_boxes(sample_data);
         // act
-        let junction_networks = connect_junction_boxes_n_times(junction_boxes, 10);
-        let mut sizes: Vec<usize> = junction_networks.iter().map(|x| x.len()).collect();
+        let networks = connect_junction_boxes_n_times(junction_boxes, 10);
+        let mut sizes: Vec<usize> = networks.iter().map(|x| x.len()).collect();
         sizes.sort();
         let product_of_three_longest: usize = sizes.iter().rev().take(3).product();
         // assert
         assert_eq!(product_of_three_longest, 40)
+    }
+    #[test]
+    fn test_connect_junction_boxes_to_exhaustion() {
+        // arrange
+        let sample_data = sample_data();
+        let junction_boxes = parse_junction_boxes(sample_data);
+        // act
+        let networks = connect_junction_boxes_to_exhaustion(junction_boxes);
+
+        // assert
+        assert_eq!(networks.0.x * networks.1.x, 25272)
     }
 
     #[test]
