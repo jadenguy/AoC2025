@@ -193,13 +193,13 @@ fn run_day7() {
     println!("Day 7 Part 2: Manifold beam paths {}", proc.1);
 }
 fn run_day8() {
-    use aoc2025::day8::{connect_junction_boxes, parse_junction_boxes};
+    use aoc2025::day8::{connect_junction_boxes_n_times, parse_junction_boxes};
     let junction_box_strings =
         read_lines("./data/day8/part1.txt").expect("Failed to read lines from file");
     let jbox: Vec<&str> = junction_box_strings.iter().map(|l| l.as_str()).collect();
     let junction_boxes = parse_junction_boxes(jbox);
 
-    let junction_networks = connect_junction_boxes(junction_boxes, 1000);
+    let junction_networks = connect_junction_boxes_n_times(junction_boxes, 1000);
     let mut sizes: Vec<usize> = junction_networks.iter().map(|x| x.len()).collect();
     sizes.sort_by_key(|&k| -1 * (k as i64));
     let product_of_three_longest: usize = sizes.iter().take(3).product();

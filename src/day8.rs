@@ -15,7 +15,7 @@ pub fn parse_junction_boxes(sample_data: Vec<&str>) -> Vec<JunctionBox> {
         })
         .collect()
 }
-pub fn connect_junction_boxes(
+pub fn connect_junction_boxes_n_times(
     boxes: Vec<JunctionBox>,
     connection_count: i64,
 ) -> Vec<HashSet<JunctionBox>> {
@@ -26,22 +26,30 @@ pub fn connect_junction_boxes(
         .collect();
     for first_box_index in 0..boxes.len() {
         let a = &boxes[first_box_index];
-        print!("  ");
-        println!("{}: {},{},{}", a.id, a.x, a.y, a.z);
+        // print!("  ");
+        // println!("{}: {},{},{}", a.id, a.x, a.y, a.z);
         for second_box_index in (first_box_index + 1)..boxes.len() {
             let b = &boxes[second_box_index];
             distances.push(((a.clone(), b.clone()), a.distance_to_box(b)));
         }
     }
     distances.sort_by_key(|x| x.1);
-    println!("{} pairwise distances found", distances.len());
+    // println!("{} pairwise distances found", distances.len());
     let mut connections = 0;
-    for ((a, b), dist) in distances {
-        if connections == connection_count {
+    for ((a, b), _distance) in distances {
+        if networks.len() == 1 {
             continue;
         }
-        print!("  ");
-        print!("{} to {} is sqrt({}); ", a.id, b.id, dist);
+        if connections == connection_count && connection_count > 0 {
+            continue;
+        }
+        // print!("  ");
+        // print!(
+        //     "{} to {} is sqrt({}); ",
+        //     a.to_coordinates_string(),
+        //     b.to_coordinates_string(),
+        //     dist
+        // );
         let mut net_a = None;
         let mut net_b = None;
         for (idx, net) in networks.iter().enumerate() {
@@ -52,20 +60,25 @@ pub fn connect_junction_boxes(
                 net_b = Some(idx);
             }
         }
+
         match (net_a, net_b) {
             (Some(i), Some(j)) if i == j => {
-                println!("Boxes in one network")
+                // println!("Boxes in one network")
             }
-            (Some(i), Some(j)) => {
-                print!(
-                    "Combining network containing {} and ",
-                    networks[i]
-                        .iter()
-                        .map(|x| x.id.to_string())
-                        .collect::<Vec<_>>()
-                        .join("-")
-                );
+            (Some(mut i), Some(mut j)) => {
+                // print!(
+                //     "Combining network containing {} and ",
+                //     networks[i]
+                //         .iter()
+                //         .map(|x| x.id.to_string())
+                //         .collect::<Vec<_>>()
+                //         .join("-")
+                // );
+                if i > j {
+                    (i, j) = (j, i)
+                }
                 let other = networks.remove(j);
+<<<<<<< Updated upstream
                 println!(
                     "network containing {}.",
                     other
@@ -74,7 +87,18 @@ pub fn connect_junction_boxes(
                         .collect::<Vec<_>>()
                         .join("-")
                 );
-                todo!("make sure i and j are ordered");
+                // todo!("make sure i and j are ordered");
+=======
+                // println!(
+                //     "network containing {}.",
+                //     other
+                //         .iter()
+                //         .map(|x| x.id.to_string())
+                //         .collect::<Vec<_>>()
+                //         .join("-")
+                // );
+                // println!();
+>>>>>>> Stashed changes
                 networks[i].extend(other);
             }
             _ => {
@@ -83,23 +107,23 @@ pub fn connect_junction_boxes(
         }
         connections += 1;
         if connections == connection_count {
-            println!("");
-            println!(" All connections exhausted.")
+            // println!("");
+            // println!(" All connections exhausted.")
         }
     }
-    println!("{} networks found", networks.len());
-    networks.sort_by_key(|k| 1000 - k.len());
-    for net in networks.iter() {
-        print!("  ");
-        print!("{} elements: ", net.len());
-        println!(
-            "{}",
-            net.iter()
-                .map(|x| x.id.to_string())
-                .collect::<Vec<_>>()
-                .join("-")
-        )
-    }
+    // println!("{} networks found", networks.len());
+    networks.sort_by_key(|k| -(k.len() as i64));
+    // for net in networks.iter() {
+    // print!("  ");
+    // print!("{} elements: ", net.len());
+    // println!(
+    //     "{}",
+    //     net.iter()
+    //         .map(|x| x.id.to_string())
+    //         .collect::<Vec<_>>()
+    //         .join("-")
+    // )
+    // }
     networks
 }
 
@@ -111,6 +135,9 @@ pub struct JunctionBox {
     pub z: i64,
 }
 impl JunctionBox {
+    // fn to_coordinates_string(&self) -> String {
+    //     format!("{},{},{}", self.x, self.y, self.z)
+    // }
     fn distance_to_box(&self, other: &JunctionBox) -> i64 {
         let mut dist = 0;
         dist += (self.x - other.x) * (self.x - other.x);
