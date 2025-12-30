@@ -74,6 +74,7 @@ pub fn connect_junction_boxes(
                         .collect::<Vec<_>>()
                         .join("-")
                 );
+                todo!("make sure i and j are ordered");
                 networks[i].extend(other);
             }
             _ => {
