@@ -86,8 +86,11 @@ pub fn convert_lines_to_board(board_rows: Vec<String>) -> Board {
             .flatten(),
     )
 }
-pub
-fn print_board(board: &std::collections::HashMap<Coordinate, char>, max_row: i32, max_col: i32) {
+pub fn print_board(
+    board: &std::collections::HashMap<Coordinate, char>,
+    max_row: i32,
+    max_col: i32,
+) {
     print!("{}[2J", 27 as char);
     for row_num in 0..=max_row {
         for col_num in 0..=max_col {
@@ -102,5 +105,62 @@ fn print_board(board: &std::collections::HashMap<Coordinate, char>, max_row: i32
             }
         }
         println!();
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use crate::day4::{
+        convert_lines_to_board, find_isolated_rolls, find_isolated_rolls_with_output,
+    };
+    #[test]
+    fn test_find_rolls_p1() {
+        let board_string: Vec<String> = r#"
+            ..@@.@@@@.
+            @@@.@.@.@@
+            @@@@@.@.@@
+            @.@@@@..@.
+            @@.@@@@.@@
+            .@@@@@@@.@
+            .@.@.@.@@@
+            @.@@@.@@@@
+            .@@@@@@@@.
+            @.@.@@@.@."#
+            .split("\n")
+            .map(|x| x.trim().to_string())
+            .filter(|x| !x.is_empty())
+            .collect();
+        let board = convert_lines_to_board(board_string);
+        let x = find_isolated_rolls(board);
+        assert_eq!(x, 13)
+    }
+    #[test]
+    fn test_find_rolls_p2() {
+        let mut ret = 0usize;
+        let board_string: Vec<String> = r#"
+            ..@@.@@@@.
+            @@@.@.@.@@
+            @@@@@.@.@@
+            @.@@@@..@.
+            @@.@@@@.@@
+            .@@@@@@@.@
+            .@.@.@.@@@
+            @.@@@.@@@@
+            .@@@@@@@@.
+            @.@.@@@.@."#
+            .split("\n")
+            .map(|x| x.trim().to_string())
+            .filter(|x| !x.is_empty())
+            .collect();
+        let mut board = convert_lines_to_board(board_string);
+        let mut found = 1;
+        while found > 0 {
+            let x = find_isolated_rolls_with_output(board);
+            found = x.0;
+            board = x.1;
+            ret += found;
+        }
+
+        assert_eq!(ret, 43)
     }
 }

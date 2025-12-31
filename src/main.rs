@@ -220,10 +220,10 @@ fn run_day9() {
     let tiles = parse_tiles(tile_string.iter().map(|x| x.as_str()).collect());
 
     let (_a, _b, area) =
-        furthest_tiles(&tiles).expect("returned none but should have returned some");
+        furthest_tiles(&tiles).expect("returned none but should have returned red pair tiles");
     println!("Day 9 Part 1: Largest rectangle area {}", area);
-    let (_a, _b, area) =
-        furthest_red_green_tiles(&tiles).expect("returned none but should have returned some");
+    let (_a, _b, area) = furthest_red_green_tiles(&tiles)
+        .expect("returned none but should have returned red pair tiles over red/green");
     println!("Day 9 Part 2: Largest red/green rectangle area {}", area);
 }
 fn run_day10() {
