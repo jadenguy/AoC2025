@@ -3,31 +3,33 @@ pub fn furthest_red_green_tiles(tiles: &Vec<Coordinate>) -> Option<(Coordinate, 
     if len == 0 {
         return None;
     }
-    let line_segments: Vec<LineSegment> = generate_segments(tiles, len);
+
     let pairwise_areas = get_all_pairs_sorted_descending(tiles);
     // let largest = pairwise_areas[0];
     // find_segments_hitting_point(line_segments, largest);
     'bounding_box_search: for (a, b, dist) in pairwise_areas {
         println!("Bounding Box {},{} {},{} Area {}", a.x, a.y, b.x, b.y, dist);
-        let piercing_box_indexes: Vec<usize> = line_segments
+        let (box_min_x, box_max_x) = if a.x < b.x { (a.x, b.x) } else { (b.x, a.x) };
+        let (box_min_y, box_max_y) = if a.y < b.y { (a.y, b.y) } else { (b.y, a.y) };
+        illustrate(tiles, box_min_x, box_max_x, box_min_y, box_max_y);
+        let piercing_box_indexes: Vec<Coordinate> = tiles
             .iter()
-            .enumerate()
-            .filter_map(|(i, n)| -> Option<usize> {
-                match n.pierces_bounding_box(a, b) {
-                    true => Some(i),
-                    false => None,
+            .filter_map(|p| {
+                // x inside box
+                let x_ok = box_min_x < p.x && p.x < box_max_x;
+                let y_ok = box_min_y < p.y && p.y < box_max_y;
+                if x_ok && y_ok {
+                    let coordinate = p.to_owned();
+                    return Some(coordinate);
                 }
+                None
             })
             .collect();
         if piercing_box_indexes.len() > 0 {
-            for i in piercing_box_indexes {
+            for p in piercing_box_indexes {
                 println!(
-                    " {},{} to {},{} pierced by {}",
-                    a.x,
-                    a.y,
-                    b.x,
-                    b.y,
-                    line_segments[i].to_string()
+                    " {},{} to {},{} pierced by {},{}",
+                    a.x, a.y, b.x, b.y, p.x, p.y
                 )
             }
             continue 'bounding_box_search;
@@ -36,86 +38,31 @@ pub fn furthest_red_green_tiles(tiles: &Vec<Coordinate>) -> Option<(Coordinate, 
     }
     None
 }
-pub fn generate_segments(tiles: &Vec<Coordinate>, len: usize) -> Vec<LineSegment> {
-    let mut line_segments: Vec<LineSegment> = Vec::new();
-    for a_index in 0..len {
-        let a = tiles[a_index];
-        let b = tiles[match a_index {
-            i if i == len - 1 => 0,
-            i => i + 1,
-        }];
-        line_segments.push(LineSegment::from_coordinates(a, b));
-    }
-    line_segments
-}
-impl LineSegment {
-    fn to_string(&self) -> String {
-        match &self {
-            LineSegment::Horizontal {
-                x_left: x_low,
-                x_right: x_high,
-                y,
-            } => {
-                format!("Horizontal from {},{} to {},{}", x_low, y, x_high, y)
-            }
-            LineSegment::Vertical {
-                x,
-                y_bottom: y_low,
-                y_top: y_high,
-            } => {
-                format!("Vertical from {},{} to {},{}", x, y_low, x, y_high)
-            }
-            _ => format!("false"),
-        }
-    }
-    fn from_coordinates(a: Coordinate, b: Coordinate) -> LineSegment {
-        match (a, b) {
-            (a, b) if a.x == b.x && a.y < b.y => LineSegment::Vertical {
-                x: a.x,
-                y_bottom: a.y,
-                y_top: b.y,
-            },
-            (a, b) if a.x == b.x => LineSegment::Vertical {
-                x: a.x,
-                y_bottom: b.y,
-                y_top: a.y,
-            },
-            (a, b) if a.y == b.y && a.x < b.x => LineSegment::Horizontal {
-                x_left: a.x,
-                x_right: b.x,
-                y: a.y,
-            },
 
-            (a, b) if a.y == b.y => LineSegment::Horizontal {
-                x_left: b.x,
-                x_right: a.x,
-                y: a.y,
-            },
-            _ => LineSegment::Error,
-        }
-    }
-    fn pierces_bounding_box(&self, a: Coordinate, b: Coordinate) -> bool {
-        todo!(
-            "write a box data structure, change the segments to just be paired coordinates, and rewrite to see if either point exists inside the box more clearly"
-        );
-
-        let (box_min_x, box_max_x) = if a.x < b.x { (a.x, b.x) } else { (b.x, a.x) };
-        let (box_min_y, box_max_y) = if a.y < b.y { (a.y, b.y) } else { (b.y, a.y) };
-        match self {
-            &LineSegment::Horizontal { x_left, x_right, y }
-                if box_min_y < y && y < box_max_y && x_left < box_max_x && box_min_x < x_right =>
-            {
-                true
+fn illustrate(
+    tiles: &[Coordinate],
+    box_min_x: i64,
+    box_max_x: i64,
+    box_min_y: i64,
+    box_max_y: i64,
+) {
+    let (x_list, y_list): (Vec<i64>, Vec<i64>) = tiles.iter().map(|t| (t.x, t.y)).unzip();
+    let max_x = *x_list.iter().max().unwrap() + 1;
+    let max_y = *y_list.iter().max().unwrap() + 1;
+    for y in 0..=max_y {
+        for x in 0..=max_x {
+            if tiles.contains(&Coordinate { x: x, y: y }) {
+                print!("#")
+            } else if box_min_x <= x && x <= box_max_x && box_min_y <= y && y <= box_max_y {
+                print!("O")
+            } else {
+                print!(".")
             }
-            &LineSegment::Vertical { x, y_bottom, y_top }
-                if box_min_x < x && x < box_max_x && y_bottom < box_max_y && box_min_y < y_top =>
-            {
-                true
-            }
-            _ => false,
         }
+        println!()
     }
 }
+
 pub fn furthest_tiles(tiles: &Vec<Coordinate>) -> Option<(Coordinate, Coordinate, i64)> {
     let mut pairwise_areas = get_all_pairs_sorted_descending(tiles);
     if pairwise_areas.len() > 0 {
@@ -169,10 +116,8 @@ pub enum LineSegment {
 }
 #[cfg(test)]
 mod tests {
+    use super::*;
     use std::collections::HashSet;
-
-    use crate::day9::{Coordinate, furthest_red_green_tiles, furthest_tiles, parse_tiles};
-
     #[test]
     fn test_furthest_tiles() {
         // arrange
