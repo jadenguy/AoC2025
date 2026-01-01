@@ -1,31 +1,71 @@
-use std::collections::HashSet;
-
 pub fn furthest_red_green_tiles(tiles: &Vec<Coordinate>) -> Option<(Coordinate, Coordinate, i64)> {
     let len = tiles.len();
     if len == 0 {
         return None;
     }
-    // let line_segments: HashSet<LineSegment> = generate_segments(tiles, len);
-    // let pairwise_areas = get_all_pairs(tiles);
-    // let best: Option<(Coordinate, Coordinate, i64)> =
-    //     Some(pairwise_areas.iter().filter_map(|x| process(&x)).first());
+    let line_segments: Vec<LineSegment> = generate_segments(tiles, len);
+    let pairwise_areas = get_all_pairs_sorted_descending(tiles);
+    // let largest = pairwise_areas[0];
+    // find_segments_hitting_point(line_segments, largest);
+    for (a, b, dist) in pairwise_areas {
+        let (min_x, max_x) = if a.x < b.x { (a.x, b.x) } else { (b.x, a.x) };
+        let (min_y, max_y) = if a.y < b.y { (a.y, b.y) } else { (b.y, a.y) };
+        let up = LineSegment::from_i64(min_x, min_y, min_x, max_y);
+        let right = LineSegment::from_i64(min_x, max_y, max_x, max_y);
+        let down = LineSegment::from_i64(max_x, max_y, max_x, min_y);
+        let left = LineSegment::from_i64(max_x, min_y, max_x, min_y);
+        let hits_up = find_intersecting_segments(&line_segments, up);
+        for i in hits_up {
+            let seg = line_segments[i];
+            println!("{}", seg.to_string())
+        }
+    }
+
     None
 }
 
-pub fn generate_segments(tiles: &Vec<Coordinate>, len: usize) -> HashSet<LineSegment> {
-    let mut line_segments: HashSet<LineSegment> = HashSet::new();
+fn find_intersecting_segments(line_segments: &Vec<LineSegment>, up: LineSegment) -> Vec<usize> {
+    let hits_up: Vec<usize> = line_segments
+        .iter()
+        .enumerate()
+        .filter_map(|(i, n)| -> Option<usize> {
+            if n.intersects_perpendicular(up) {
+                return None;
+            }
+            return Some(i);
+        })
+        .collect();
+    hits_up
+}
+
+pub fn generate_segments(tiles: &Vec<Coordinate>, len: usize) -> Vec<LineSegment> {
+    let mut line_segments: Vec<LineSegment> = Vec::new();
     for a_index in 0..len {
         let a = tiles[a_index];
         let b = tiles[match a_index {
             i if i == len - 1 => 0,
             i => i + 1,
         }];
-        line_segments.insert(LineSegment::from_coodinates(a, b));
+        line_segments.push(LineSegment::from_coordinates(a, b));
     }
     line_segments
 }
 impl LineSegment {
-    fn from_coodinates(a: Coordinate, b: Coordinate) -> LineSegment {
+    fn to_string(&self) -> String {
+        match &self {
+            LineSegment::Horizontal { x_low, x_high, y } => {
+                format!("Horizontal from {},{} to {},{}", x_low, y, x_high, y)
+            }
+            LineSegment::Vertical { x, y_low, y_high } => {
+                format!("Vertical from {},{} to {},{}", x, y_low, x, y_high)
+            }
+            _ => format!("false"),
+        }
+    }
+    fn from_i64(a_x: i64, a_y: i64, b_x: i64, b_y: i64) -> LineSegment {
+        LineSegment::from_coordinates(Coordinate { x: a_x, y: a_y }, Coordinate { x: b_x, y: b_y })
+    }
+    fn from_coordinates(a: Coordinate, b: Coordinate) -> LineSegment {
         match (a, b) {
             (a, b) if a.x == b.x && a.y < b.y => LineSegment::Vertical {
                 x: a.x,
@@ -51,17 +91,67 @@ impl LineSegment {
             _ => LineSegment::Error,
         }
     }
+    fn intersects_perpendicular(&self, other: Self) -> bool {
+        match (self, other) {
+            (
+                &LineSegment::Vertical { x, y_low, y_high },
+                LineSegment::Horizontal { x_low, x_high, y },
+            )
+            | (
+                &LineSegment::Horizontal { x_low, x_high, y },
+                LineSegment::Vertical { x, y_low, y_high },
+            ) if x_low <= x && x <= x_high && y_low <= y && y <= y_high => true,
+            _ => false,
+        }
+    }
+    fn intersects_including_perpendicular(&self, other: Self) -> bool {
+        match (self, other) {
+            (
+                &LineSegment::Vertical { x, y_low, y_high },
+                LineSegment::Horizontal { x_low, x_high, y },
+            )
+            | (
+                &LineSegment::Horizontal { x_low, x_high, y },
+                LineSegment::Vertical { x, y_low, y_high },
+            ) if x_low <= x && x <= x_high && y_low <= y && y <= y_high => true,
+            (
+                &LineSegment::Vertical {
+                    x: x1,
+                    y_low: yl1,
+                    y_high: yh1,
+                },
+                LineSegment::Vertical {
+                    x: x2,
+                    y_low: yl2,
+                    y_high: yh2,
+                },
+            ) if x1 == x2 && yl1 <= yh2 && yl2 <= yh1 => true,
+
+            (
+                &LineSegment::Horizontal {
+                    x_low: xl1,
+                    x_high: xh1,
+                    y: y1,
+                },
+                LineSegment::Horizontal {
+                    x_low: xl2,
+                    x_high: xh2,
+                    y: y2,
+                },
+            ) if (y1 == y2) && xl1 <= xh2 && xl2 <= xh1 => true,
+            _ => false,
+        }
+    }
 }
 pub fn furthest_tiles(tiles: &Vec<Coordinate>) -> Option<(Coordinate, Coordinate, i64)> {
-    let mut pairwise_areas = get_all_pairs(tiles);
+    let mut pairwise_areas = get_all_pairs_sorted_descending(tiles);
     if pairwise_areas.len() > 0 {
         let result = pairwise_areas.remove(0);
         return Some(result);
     }
     None
 }
-
-fn get_all_pairs(tiles: &Vec<Coordinate>) -> Vec<(Coordinate, Coordinate, i64)> {
+fn get_all_pairs_sorted_descending(tiles: &Vec<Coordinate>) -> Vec<(Coordinate, Coordinate, i64)> {
     let mut pairwise_areas: Vec<(Coordinate, Coordinate, i64)> = Vec::new();
     for first in 0..tiles.len() {
         let a = tiles[first];
@@ -88,7 +178,6 @@ pub fn parse_tiles(tile_strings: Vec<&str>) -> Vec<Coordinate> {
         })
         .collect()
 }
-
 #[derive(Debug, Clone, Copy, Eq, PartialEq, Hash, PartialOrd, Ord)]
 pub struct Coordinate {
     pub x: i64,
