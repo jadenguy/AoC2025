@@ -7,37 +7,35 @@ pub fn furthest_red_green_tiles(tiles: &Vec<Coordinate>) -> Option<(Coordinate, 
     let pairwise_areas = get_all_pairs_sorted_descending(tiles);
     // let largest = pairwise_areas[0];
     // find_segments_hitting_point(line_segments, largest);
-    for (a, b, dist) in pairwise_areas {
-        let (min_x, max_x) = if a.x < b.x { (a.x, b.x) } else { (b.x, a.x) };
-        let (min_y, max_y) = if a.y < b.y { (a.y, b.y) } else { (b.y, a.y) };
-        let up = LineSegment::from_i64(min_x, min_y, min_x, max_y);
-        let right = LineSegment::from_i64(min_x, max_y, max_x, max_y);
-        let down = LineSegment::from_i64(max_x, max_y, max_x, min_y);
-        let left = LineSegment::from_i64(max_x, min_y, max_x, min_y);
-        let hits_up = find_intersecting_segments(&line_segments, up);
-        for i in hits_up {
-            let seg = line_segments[i];
-            println!("{}", seg.to_string())
+    'bounding_box_search: for (a, b, dist) in pairwise_areas {
+        println!("Bounding Box {},{} {},{} Area {}", a.x, a.y, b.x, b.y, dist);
+        let piercing_box_indexes: Vec<usize> = line_segments
+            .iter()
+            .enumerate()
+            .filter_map(|(i, n)| -> Option<usize> {
+                match n.pierces_bounding_box(a, b) {
+                    true => Some(i),
+                    false => None,
+                }
+            })
+            .collect();
+        if piercing_box_indexes.len() > 0 {
+            for i in piercing_box_indexes {
+                println!(
+                    " {},{} to {},{} pierced by {}",
+                    a.x,
+                    a.y,
+                    b.x,
+                    b.y,
+                    line_segments[i].to_string()
+                )
+            }
+            continue 'bounding_box_search;
         }
+        return Some((a, b, dist));
     }
-
     None
 }
-
-fn find_intersecting_segments(line_segments: &Vec<LineSegment>, up: LineSegment) -> Vec<usize> {
-    let hits_up: Vec<usize> = line_segments
-        .iter()
-        .enumerate()
-        .filter_map(|(i, n)| -> Option<usize> {
-            if n.intersects_perpendicular(up) {
-                return None;
-            }
-            return Some(i);
-        })
-        .collect();
-    hits_up
-}
-
 pub fn generate_segments(tiles: &Vec<Coordinate>, len: usize) -> Vec<LineSegment> {
     let mut line_segments: Vec<LineSegment> = Vec::new();
     for a_index in 0..len {
@@ -53,92 +51,67 @@ pub fn generate_segments(tiles: &Vec<Coordinate>, len: usize) -> Vec<LineSegment
 impl LineSegment {
     fn to_string(&self) -> String {
         match &self {
-            LineSegment::Horizontal { x_low, x_high, y } => {
+            LineSegment::Horizontal {
+                x_left: x_low,
+                x_right: x_high,
+                y,
+            } => {
                 format!("Horizontal from {},{} to {},{}", x_low, y, x_high, y)
             }
-            LineSegment::Vertical { x, y_low, y_high } => {
+            LineSegment::Vertical {
+                x,
+                y_bottom: y_low,
+                y_top: y_high,
+            } => {
                 format!("Vertical from {},{} to {},{}", x, y_low, x, y_high)
             }
             _ => format!("false"),
         }
     }
-    fn from_i64(a_x: i64, a_y: i64, b_x: i64, b_y: i64) -> LineSegment {
-        LineSegment::from_coordinates(Coordinate { x: a_x, y: a_y }, Coordinate { x: b_x, y: b_y })
-    }
     fn from_coordinates(a: Coordinate, b: Coordinate) -> LineSegment {
         match (a, b) {
             (a, b) if a.x == b.x && a.y < b.y => LineSegment::Vertical {
                 x: a.x,
-                y_low: a.y,
-                y_high: b.y,
+                y_bottom: a.y,
+                y_top: b.y,
             },
             (a, b) if a.x == b.x => LineSegment::Vertical {
                 x: a.x,
-                y_low: b.y,
-                y_high: a.y,
+                y_bottom: b.y,
+                y_top: a.y,
             },
             (a, b) if a.y == b.y && a.x < b.x => LineSegment::Horizontal {
-                x_low: a.x,
-                x_high: b.x,
+                x_left: a.x,
+                x_right: b.x,
                 y: a.y,
             },
 
             (a, b) if a.y == b.y => LineSegment::Horizontal {
-                x_low: b.x,
-                x_high: a.x,
+                x_left: b.x,
+                x_right: a.x,
                 y: a.y,
             },
             _ => LineSegment::Error,
         }
     }
-    fn intersects_perpendicular(&self, other: Self) -> bool {
-        match (self, other) {
-            (
-                &LineSegment::Vertical { x, y_low, y_high },
-                LineSegment::Horizontal { x_low, x_high, y },
-            )
-            | (
-                &LineSegment::Horizontal { x_low, x_high, y },
-                LineSegment::Vertical { x, y_low, y_high },
-            ) if x_low <= x && x <= x_high && y_low <= y && y <= y_high => true,
-            _ => false,
-        }
-    }
-    fn intersects_including_perpendicular(&self, other: Self) -> bool {
-        match (self, other) {
-            (
-                &LineSegment::Vertical { x, y_low, y_high },
-                LineSegment::Horizontal { x_low, x_high, y },
-            )
-            | (
-                &LineSegment::Horizontal { x_low, x_high, y },
-                LineSegment::Vertical { x, y_low, y_high },
-            ) if x_low <= x && x <= x_high && y_low <= y && y <= y_high => true,
-            (
-                &LineSegment::Vertical {
-                    x: x1,
-                    y_low: yl1,
-                    y_high: yh1,
-                },
-                LineSegment::Vertical {
-                    x: x2,
-                    y_low: yl2,
-                    y_high: yh2,
-                },
-            ) if x1 == x2 && yl1 <= yh2 && yl2 <= yh1 => true,
+    fn pierces_bounding_box(&self, a: Coordinate, b: Coordinate) -> bool {
+        todo!(
+            "write a box data structure, change the segments to just be paired coordinates, and rewrite to see if either point exists inside the box more clearly"
+        );
 
-            (
-                &LineSegment::Horizontal {
-                    x_low: xl1,
-                    x_high: xh1,
-                    y: y1,
-                },
-                LineSegment::Horizontal {
-                    x_low: xl2,
-                    x_high: xh2,
-                    y: y2,
-                },
-            ) if (y1 == y2) && xl1 <= xh2 && xl2 <= xh1 => true,
+        let (box_min_x, box_max_x) = if a.x < b.x { (a.x, b.x) } else { (b.x, a.x) };
+        let (box_min_y, box_max_y) = if a.y < b.y { (a.y, b.y) } else { (b.y, a.y) };
+        match self {
+            &LineSegment::Horizontal { x_left, x_right, y }
+                if box_min_y < y && y < box_max_y && x_left < box_max_x && box_min_x < x_right =>
+            {
+                true
+            }
+            &LineSegment::Vertical { x, y_bottom, y_top }
+                if box_min_x < x && x < box_max_x && y_bottom < box_max_y && box_min_y < y_top =>
+            {
+                true
+            }
             _ => false,
         }
     }
@@ -190,8 +163,8 @@ impl PartialEq<(i64, i64)> for Coordinate {
 }
 #[derive(Debug, Clone, Copy, Eq, PartialEq, Hash, PartialOrd, Ord)]
 pub enum LineSegment {
-    Vertical { x: i64, y_low: i64, y_high: i64 },
-    Horizontal { x_low: i64, x_high: i64, y: i64 },
+    Vertical { x: i64, y_bottom: i64, y_top: i64 },
+    Horizontal { x_left: i64, x_right: i64, y: i64 },
     Error,
 }
 #[cfg(test)]
@@ -247,7 +220,6 @@ mod tests {
             ]
         )
     }
-    //
     fn sample_data() -> Vec<&'static str> {
         r#"7,1
         11,1
