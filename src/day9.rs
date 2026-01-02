@@ -1,43 +1,50 @@
 use std::collections::HashSet;
 
 pub fn furthest_red_green_tiles(tiles: &Vec<Coordinate>) -> Option<(Coordinate, Coordinate, i64)> {
-    todo!("performance poor, rewrite to go with old piercing line approach");
-    let len = tiles.len();
-    if len == 0 {
-        return None;
-    }
-    let red_or_green = get_green_tiles(tiles);
     let pairwise_areas = get_all_pairs_sorted_descending(tiles);
-    // let largest = pairwise_areas[0];
-    // find_segments_hitting_point(line_segments, largest);
-    for (a, b, dist) in pairwise_areas {
+    let mut line_segments: Vec<(Coordinate, Coordinate)> = Vec::new();
+    for index in 0..tiles.len() {
+        let a = tiles[index];
+        let b = match index {
+            i if i + 1 == tiles.len() => tiles[0],
+            _ => tiles[index + 1],
+        };
+        
+        line_segments.push((a, b));
+    }
+    'bounding_box_check: for (a, b, dist) in pairwise_areas {
         println!(
             "Bounding Box {},{} {},{} Area {}",
             a.row, a.col, b.row, b.col, dist
         );
-        let (box_min_row, box_max_row) = if a.row < b.row {
-            (a.row, b.row)
-        } else {
-            (b.row, a.row)
+        let (min_col, max_col) = match a.col {
+            _ if a.col < b.col => (a.col, b.col),
+            _ => (b.col, a.col),
         };
-        let (box_min_col, box_max_col) = if a.col < b.col {
-            (a.col, b.col)
-        } else {
-            (b.col, a.col)
+        let (min_row, max_row) = match a.row {
+            _ if a.row < b.row => (a.row, b.row),
+            _ => (b.row, a.row),
         };
-        let outside_tiles = count_of_cells_outside_line(
-            tiles,
-            &red_or_green,
-            box_min_row,
-            box_max_row,
-            box_min_col,
-            box_max_col,
-        );
-        if outside_tiles == 0 {
-            return Some((a, b, dist));
+
+        if line_segments
+            .iter()
+            .any(|&l| intersects_any(l, min_row, max_row, min_col, max_col))
+        {
+            continue 'bounding_box_check;
         }
+        return Some((a, b, dist));
     }
     None
+}
+
+fn intersects_any(
+    l: (Coordinate, Coordinate),
+    min_row: i64,
+    max_row: i64,
+    min_col: i64,
+    max_col: i64,
+) -> bool {
+    
 }
 
 fn get_green_tiles(tiles: &[Coordinate]) -> HashSet<Coordinate> {
