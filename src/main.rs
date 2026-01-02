@@ -227,7 +227,18 @@ fn run_day9() {
     println!("Day 9 Part 2: Largest red/green rectangle area {}", area);
 }
 fn run_day10() {
-    println!("Running day 10 logic");
+    use aoc2025::day10::*;
+    let machine_inst_list =
+        read_lines("./data/day10/part1.txt").expect("Failed to read lines from file");
+    let machines: Vec<MachineState> = machine_inst_list
+        .iter()
+        // .skip(1)
+        .map(|d| MachineState::from_instructions(&parse_machine_instructions(d)))
+        // .take(1)
+        .collect();
+    // act
+    let presses: usize = machines.iter().map(|m| find_min_presses(m)).sum();
+    println!("Day 10 Part 1: Min Presses {}", presses)
 }
 fn run_day11() {
     println!("Running day 11 logic");

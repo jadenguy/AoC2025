@@ -10,7 +10,7 @@
 // [...#.] (0,2,3,4) (2,3) (0,4) (0,1,2) (1,2,3,4) {7,5,12,7,2}
 // [.###.#] (0,1,2,3,4) (0,3,4) (0,1,2,4,5) (1,2) {10,11,11,5,10,5}
 
-use std::iter;
+use std::{fmt, iter};
 
 // The manual describes one machine per line. Each line contains a single indicator light diagram in [square brackets], one or more button wiring schematics in (parentheses), and joltage requirements in {curly braces}.
 type Indicator = u8;
@@ -87,16 +87,17 @@ pub fn parse_machine_instructions(d: &str) -> MachineDefinition {
 // So, a button wiring schematic like (0,3,4) means that each time you push that button, the first, fourth, and fifth indicator lights would all toggle between on and off. If the indicator lights were [#.....], pushing the button would change them to be [...##.] instead.
 
 // Because none of the machines are running, the joltage requirements are irrelevant and can be safely ignored.
-#[derive(Debug, PartialEq, Eq, PartialOrd, Ord)]
+#[derive(Debug, PartialEq, Eq, PartialOrd, Ord, Clone)]
 pub struct MachineState {
     pub lit_indicators: Vec<Indicator>,
-    instructions: MachineDefinition,
+    pub instructions: MachineDefinition,
 }
+
 impl MachineState {
-    pub fn push_button(&self, button_index: usize) -> MachineState {
+    pub fn push_button(&self, button_index: &usize) -> MachineState {
         let instructions = self.instructions.to_owned();
         let mut new_indicators = self.lit_indicators.to_owned();
-        let items = &instructions.buttons[button_index];
+        let items = &instructions.buttons[*button_index];
         push_botton(&mut new_indicators, items);
         MachineState {
             lit_indicators: new_indicators,
@@ -126,8 +127,63 @@ fn push_botton(new_indicators: &mut [u8], items: &[usize]) {
 
 // You can push each button as many times as you like. However, to save on time, you will need to determine the fewest total presses required to correctly configure all indicator lights for all machines in your list.
 
-fn find_min_presses(m: &MachineState) -> usize {
-    todo!()
+pub fn find_min_presses(m: &MachineState) -> usize {
+    let len = m.instructions.buttons.len();
+    let max_button_state: usize = 1 << (len);
+    let mut min_presses = len;
+    for button_press_state in 0..=max_button_state {
+        let buttons_pressed: Vec<usize> = (0..len)
+            .filter_map(|indicator_index| {
+                let var_name = button_press_state >> indicator_index;
+                if 1 == ((var_name) & 1) {
+                    return Some(indicator_index);
+                }
+                None
+            })
+            .collect();
+        let x = buttons_pressed
+            .iter()
+            .fold(m.to_owned(), |state, &button| state.push_button(&button));
+        let is_solved = x.is_on();
+        if buttons_pressed.len() < min_presses && is_solved {
+            // fun_name(m, button_press_state, &buttons_pressed, &x);
+            min_presses = buttons_pressed.len();
+        }
+    }
+    min_presses
+}
+
+fn fun_name(
+    m: &MachineState,
+    button_press_state: usize,
+    buttons_pressed: &Vec<usize>,
+    x: &MachineState,
+) {
+    {
+        let button_press_state = button_press_state;
+        println!("{}", button_press_state);
+        let l = buttons_pressed
+            .iter()
+            .map(|n| n.to_string())
+            .collect::<Vec<_>>()
+            .join(", ");
+        println!("{}", l);
+        println!("");
+    };
+    println!(
+        "{} compared to {}",
+        x.lit_indicators
+            .iter()
+            .map(|n| n.to_string())
+            .collect::<Vec<_>>()
+            .join(", "),
+        m.instructions
+            .wanted_indicator_state
+            .iter()
+            .map(|n| n.to_string())
+            .collect::<Vec<_>>()
+            .join(", ")
+    );
 }
 
 // There are a few ways to correctly configure the first machine:
@@ -166,11 +222,14 @@ mod tests {
         // arrange
         let machines: Vec<MachineState> = sample_data()
             .iter()
+            // .skip(1)
             .map(|d| MachineState::from_instructions(&parse_machine_instructions(d)))
+            // .take(1)
             .collect();
         // act
         let actual: Vec<usize> = machines.iter().map(|m| find_min_presses(m)).collect();
         // assert
+        // assert_eq!(actual, [3])
         assert_eq!(actual, [2, 3, 2])
     }
     #[test]
@@ -190,16 +249,16 @@ mod tests {
                 joltage: vec![3, 5, 4, 7],
             },
         };
-        assert_eq!(initial.push_button(0).lit_indicators, [0, 0, 0, 1]);
+        assert_eq!(initial.push_button(&0).lit_indicators, [0, 0, 0, 1]);
 
-        assert_eq!(initial.push_button(1).lit_indicators, [0, 1, 0, 1]);
+        assert_eq!(initial.push_button(&1).lit_indicators, [0, 1, 0, 1]);
 
         assert_eq!(
-            initial.push_button(1).push_button(1).lit_indicators,
+            initial.push_button(&1).push_button(&1).lit_indicators,
             [0, 0, 0, 0]
         );
         assert_eq!(
-            initial.push_button(3).push_button(5).lit_indicators,
+            initial.push_button(&3).push_button(&5).lit_indicators,
             [1, 1, 1, 1]
         );
     }
