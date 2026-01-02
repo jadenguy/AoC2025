@@ -1,6 +1,7 @@
 use std::collections::HashSet;
 
 pub fn furthest_red_green_tiles(tiles: &Vec<Coordinate>) -> Option<(Coordinate, Coordinate, i64)> {
+    todo!("performance poor, rewrite to go with old piercing line approach");
     let len = tiles.len();
     if len == 0 {
         return None;
@@ -24,7 +25,7 @@ pub fn furthest_red_green_tiles(tiles: &Vec<Coordinate>) -> Option<(Coordinate, 
         } else {
             (b.col, a.col)
         };
-        let outside_tiles = illustrate(
+        let outside_tiles = count_of_cells_outside_line(
             tiles,
             &red_or_green,
             box_min_row,
@@ -118,7 +119,7 @@ fn get_green_tiles(tiles: &[Coordinate]) -> HashSet<Coordinate> {
     red_or_green
 }
 
-fn illustrate(
+fn count_of_cells_outside_line(
     tiles: &[Coordinate],
     red_or_green: &HashSet<Coordinate>,
     box_min_row: i64,
