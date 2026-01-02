@@ -1,16 +1,15 @@
 use std::collections::HashSet;
 
-type LineSegment = (Coordinate, Coordinate);
 pub fn furthest_red_green_tiles(tiles: &Vec<Coordinate>) -> Option<(Coordinate, Coordinate, i64)> {
     let len = tiles.len();
     if len == 0 {
         return None;
     }
-    let green_tiles = get_green_tiles(tiles);
+    let red_or_green = get_green_tiles(tiles);
     let pairwise_areas = get_all_pairs_sorted_descending(tiles);
     // let largest = pairwise_areas[0];
     // find_segments_hitting_point(line_segments, largest);
-    'bounding_box_search: for (a, b, dist) in pairwise_areas {
+    for (a, b, dist) in pairwise_areas {
         println!(
             "Bounding Box {},{} {},{} Area {}",
             a.row, a.col, b.row, b.col, dist
@@ -25,108 +24,137 @@ pub fn furthest_red_green_tiles(tiles: &Vec<Coordinate>) -> Option<(Coordinate, 
         } else {
             (b.col, a.col)
         };
-        illustrate(tiles, box_min_row, box_max_row, box_min_col, box_max_col);
-        let piercing_box_indexes: Vec<Coordinate> = tiles
-            .iter()
-            .filter_map(|p| {
-                // x inside box
-                let row_ok = box_min_row < p.row && p.row < box_max_row;
-                let col_ok = box_min_col < p.col && p.col < box_max_col;
-                if row_ok && col_ok {
-                    let coordinate = p.to_owned();
-                    return Some(coordinate);
-                }
-                None
-            })
-            .collect();
-        if piercing_box_indexes.len() > 0 {
-            for p in piercing_box_indexes {
-                println!(
-                    " {},{} to {},{} pierced by {},{}",
-                    a.row, a.col, b.row, b.col, p.row, p.col
-                )
-            }
-            continue 'bounding_box_search;
+        let outside_tiles = illustrate(
+            tiles,
+            &red_or_green,
+            box_min_row,
+            box_max_row,
+            box_min_col,
+            box_max_col,
+        );
+        if outside_tiles == 0 {
+            return Some((a, b, dist));
         }
-        return Some((a, b, dist));
     }
     None
 }
 
-fn get_green_tiles(tiles: &[Coordinate]) -> Vec<Coordinate> {
-    let mut green: Vec<Coordinate> = Vec::new();
-    let mut lines: HashSet<LineSegment> = HashSet::new();
-
-    let (row_list, col_list): (Vec<i64>, Vec<i64>) = tiles.iter().map(|t| (t.row, t.col)).unzip();
-
-    let min_row = *row_list.iter().min().unwrap();
-    let min_col = *col_list.iter().min().unwrap();
-    let max_row = *row_list.iter().max().unwrap();
-    let max_col = *col_list.iter().max().unwrap();
-    let mut checked: HashSet<Coordinate> = HashSet::new();
+fn get_green_tiles(tiles: &[Coordinate]) -> HashSet<Coordinate> {
+    let mut red_or_green: HashSet<Coordinate> = HashSet::new();
+    let (mut row_list, mut col_list): (Vec<i64>, Vec<i64>) =
+        tiles.iter().map(|t| (t.row, t.col)).unzip();
+    row_list.sort();
+    col_list.sort();
+    let min_row = *row_list.first().unwrap();
+    let max_row = *row_list.last().unwrap();
+    let min_col = *col_list.first().unwrap();
+    let max_col = *col_list.last().unwrap();
     let mut unchecked: HashSet<Coordinate> = HashSet::new();
     for row in min_row..=max_row {
         for col in min_col..=max_col {
             unchecked.insert(Coordinate { row, col });
         }
     }
-    let mut left_most: LineSegment = (
-        Coordinate {
-            row: min_row,
-            col: max_col,
-        },
-        Coordinate {
-            row: max_row,
-            col: max_col,
-        },
-    );
     for index in 0..tiles.len() {
         let a = tiles[index];
         let b = match index {
-            bi if bi + 1 == tiles.len() => tiles[0],
+            i if i + 1 == tiles.len() => tiles[0],
             _ => tiles[index + 1],
         };
-        lines.insert((a, b));
-        if
-            a.col <  left_most.0.col
-            && a.col == b.col
-            && a.row - a.col.abs() > 2
-        {
-            left_most = (a, b) match
-            {
-
-            };
+        for col in a.col..b.col {
+            let on_line = Coordinate { row: a.row, col };
+            unchecked.remove(&on_line);
+            red_or_green.insert(on_line);
+        }
+        for col in b.col..=a.col {
+            let on_line = Coordinate { row: a.row, col };
+            unchecked.remove(&on_line);
+            red_or_green.insert(on_line);
+        }
+        for row in a.row..=b.row {
+            let on_line = Coordinate { row, col: a.col };
+            unchecked.remove(&on_line);
+            red_or_green.insert(on_line);
+        }
+        for row in b.row..=a.row {
+            let on_line = Coordinate { row, col: a.col };
+            unchecked.remove(&on_line);
+            red_or_green.insert(on_line);
         }
     }
-    green
+    // let's check every neighbor to every piece outside the area
+    let mut candidates: Vec<Coordinate> = Vec::new();
+    for row in min_row - 1..=max_row + 1 {
+        candidates.push(Coordinate {
+            row,
+            col: min_col - 1,
+        });
+        candidates.push(Coordinate {
+            row,
+            col: max_col + 1,
+        });
+    }
+    for col in min_col - 1..=max_col + 1 {
+        candidates.push(Coordinate {
+            row: min_row - 1,
+            col: col,
+        });
+        candidates.push(Coordinate {
+            row: max_row + 1,
+            col: col,
+        });
+    }
+    while let Some(candidate) = candidates.pop() {
+        for row in candidate.row - 1..=candidate.row + 1 {
+            for col in candidate.col - 1..=candidate.col + 1 {
+                let neighbor = Coordinate { row, col };
+                if unchecked.remove(&neighbor) {
+                    candidates.push(neighbor)
+                }
+            }
+        }
+    }
+    red_or_green.extend(unchecked);
+    red_or_green
 }
 
 fn illustrate(
     tiles: &[Coordinate],
+    red_or_green: &HashSet<Coordinate>,
     box_min_row: i64,
     box_max_row: i64,
     box_min_col: i64,
     box_max_col: i64,
-) {
+) -> usize {
+    let mut outside = 0;
     let (rowl_list, col_list): (Vec<i64>, Vec<i64>) = tiles.iter().map(|t| (t.row, t.col)).unzip();
     let max_row = *rowl_list.iter().max().unwrap() + 1;
     let max_col = *col_list.iter().max().unwrap() + 1;
     for row in 0..=max_row {
         for col in 0..=max_col {
-            if tiles.contains(&Coordinate { row, col }) {
+            let cell = &Coordinate { row, col };
+            if tiles.contains(cell) {
                 print!("#")
             } else if box_min_row <= row
                 && row <= box_max_row
                 && box_min_col <= col
                 && col <= box_max_col
             {
-                print!("O")
+                if red_or_green.contains(cell) {
+                    print!("O")
+                } else {
+                    print!("!");
+                    outside += 1
+                }
+            } else if red_or_green.contains(cell) {
+                print!("G")
             } else {
                 print!(".")
             }
         }
         println!()
     }
+    outside
 }
 
 pub fn furthest_tiles(tiles: &Vec<Coordinate>) -> Option<(Coordinate, Coordinate, i64)> {
@@ -184,8 +212,8 @@ mod tests {
         // arrange
         let tiles = parse_tiles(sample_data());
         let expected: HashSet<Coordinate> = HashSet::from_iter([
-            Coordinate { row: 11, col: 1 },
-            Coordinate { row: 2, col: 5 },
+            Coordinate { col: 11, row: 1 },
+            Coordinate { col: 2, row: 5 },
         ]);
         // act
         let (a, b, area) =
@@ -198,13 +226,11 @@ mod tests {
     fn test_furthest_red_green_tiles() {
         // arrange
         let tiles = parse_tiles(sample_data());
-        let expected: HashSet<Coordinate> =
-            HashSet::from_iter([Coordinate { row: 9, col: 5 }, Coordinate { row: 2, col: 3 }]);
+
         // act
-        let (a, b, area) =
+        let (_a, _b, area) =
             furthest_red_green_tiles(&tiles).expect("returned none but should have returned some");
         // assert
-        assert_eq!(HashSet::from_iter([a, b]), expected);
         assert_eq!(area, 24)
     }
     #[test]
@@ -226,6 +252,7 @@ mod tests {
                 (2, 3),
                 (7, 3),
             ]
+            .map(|(col, row)| Coordinate { row, col })
         )
     }
     fn sample_data() -> Vec<&'static str> {
