@@ -1,8 +1,7 @@
 **/target
-part*.txt
-
+/target
 # Added by cargo
 
-/target
 
+data/**/*
 **/.DS_Store
