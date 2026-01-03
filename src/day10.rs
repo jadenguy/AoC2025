@@ -1,8 +1,9 @@
+use good_lp::*;
 use std::iter;
 
 type Indicator = u8;
 type ButtonDefinition = Vec<usize>;
-type Joltage = i64;
+pub type Joltage = i32;
 #[derive(Debug, PartialEq, Eq, PartialOrd, Ord, Clone)]
 pub struct MachineDefinition {
     wanted_indicator_state: Vec<Indicator>,
@@ -104,14 +105,14 @@ impl MachineState {
         }
     }
 
-    fn joltage_diffs(&self) -> Vec<i64> {
-        self.instructions
-            .wanted_joltage
-            .iter()
-            .zip(self.active_joltage.iter())
-            .map(|(a, b)| a - b)
-            .collect()
-    }
+    // fn joltage_diffs(&self) -> Vec<Joltage> {
+    //     self.instructions
+    //         .wanted_joltage
+    //         .iter()
+    //         .zip(self.active_joltage.iter())
+    //         .map(|(a, b)| a - b)
+    //         .collect()
+    // }
 }
 
 fn push_botton(items: &[usize], new_indicators: &mut [Indicator], active_joltage: &mut [Joltage]) {
@@ -145,39 +146,91 @@ pub fn find_min_presses_for_indicators(m: &MachineState) -> usize {
     }
     min_presses
 }
-pub fn find_minimal_presses_for_joltage(initial_state: &MachineState) -> usize {
-    todo!("switch to linear algebra");
-    let mut unchecked_states: Vec<MachineState> = vec![initial_state.clone()];
-    let mut checked_states: Vec<MachineState> = Vec::new();
-    let mut solutions: Vec<MachineState> = Vec::new();
-    let button_indexes: Vec<usize> = (0..initial_state.instructions.buttons.len()).collect();
-    for button_index in button_indexes {
-        while let Some(state) = unchecked_states.pop() {
-            let mut keep_going = true;
-            let mut new_state: MachineState = state.to_owned();
-            while keep_going {
-                let tnew_state = new_state.push_button(&button_index);
-                new_state = tnew_state.clone();
-                let list_of_joltages_needed = (new_state).joltage_diffs();
-                if list_of_joltages_needed.iter().any(|&d| d < 0) {
-                    keep_going = false;
-                } else if list_of_joltages_needed.iter().all(|&d| d == 0) {
-                    solutions.push(tnew_state)
-                } else {
-                    checked_states.push(tnew_state);
-                }
+pub fn find_minimal_presses_for_joltage(state: &MachineState) -> Joltage {
+    find_minimal_presses_for_joltage_internal(state)
+        .unwrap()
+        .iter()
+        .sum()
+}
+fn find_minimal_presses_for_joltage_internal(
+    state: &MachineState,
+) -> Result<Vec<Joltage>, ResolutionError> {
+    let def = &state.instructions;
+    let num_buttons = def.buttons.len();
+    let num_counters = def.wanted_joltage.len();
+
+    // Create variable builder
+    let mut vars = variables!();
+
+    // One integer variable per button
+    let button_vars: Vec<Variable> = (0..num_buttons)
+        .map(|_| vars.add(variable().integer().min(0)))
+        .collect();
+
+    // Objective: minimize total button presses
+    let mut problem = vars
+        .minimise(button_vars.iter().copied().sum::<Expression>())
+        .using(microlp);
+
+    // Build constraints dynamically
+    for counter_idx in 0..num_counters {
+        let mut expr = Expression::from(0);
+
+        for (button_idx, button_def) in def.buttons.iter().enumerate() {
+            if button_def.contains(&counter_idx) {
+                expr = expr + button_vars[button_idx];
             }
-            checked_states.push(state);
         }
 
-        unchecked_states = checked_states.to_owned();
-        checked_states.clear();
+        problem = problem.with(constraint!(
+            expr == def.wanted_joltage[counter_idx] as Joltage
+        ));
     }
-    solutions
+
+    // Solve
+    let solution = problem.solve()?;
+
+    // Extract solution
+    let result = button_vars
         .iter()
-        .map(|s| s.pushes.iter().sum())
-        .min()
-        .unwrap()
+        .map(|v| solution.value(*v) as Joltage)
+        .collect();
+
+    Ok(result)
+    // todo!("switch to linear algebra");
+
+    // brute force below;
+    // let mut unchecked_states: Vec<MachineState> = vec![initial_state.clone()];
+    // let mut checked_states: Vec<MachineState> = Vec::new();
+    // let mut solutions: Vec<MachineState> = Vec::new();
+    // let button_indexes: Vec<usize> = (0..initial_state.instructions.buttons.len()).collect();
+    // for button_index in button_indexes {
+    //     while let Some(state) = unchecked_states.pop() {
+    //         let mut keep_going = true;
+    //         let mut new_state: MachineState = state.to_owned();
+    //         while keep_going {
+    //             let tnew_state = new_state.push_button(&button_index);
+    //             new_state = tnew_state.clone();
+    //             let list_of_joltages_needed = (new_state).joltage_diffs();
+    //             if list_of_joltages_needed.iter().any(|&d| d < 0) {
+    //                 keep_going = false;
+    //             } else if list_of_joltages_needed.iter().all(|&d| d == 0) {
+    //                 solutions.push(tnew_state)
+    //             } else {
+    //                 checked_states.push(tnew_state);
+    //             }
+    //         }
+    //         checked_states.push(state);
+    //     }
+
+    //     unchecked_states = checked_states.to_owned();
+    //     checked_states.clear();
+    // }
+    // solutions
+    //     .iter()
+    //     .map(|s| s.pushes.iter().sum())
+    //     .min()
+    //     .unwrap()
 }
 #[cfg(test)]
 mod tests {
@@ -190,7 +243,7 @@ mod tests {
             .map(|d| MachineState::from_instructions(&parse_machine_instructions(d)))
             .collect();
         // act
-        let actual: Vec<usize> = machines
+        let actual: Vec<Joltage> = machines
             .iter()
             .map(|m| find_minimal_presses_for_joltage(m))
             .collect();

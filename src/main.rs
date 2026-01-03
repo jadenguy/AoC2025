@@ -242,7 +242,7 @@ fn run_day10() {
         .map(|m| find_min_presses_for_indicators(m))
         .sum();
     println!("Day 10 Part 1: Min Presses {}", presses);
-    let presses: usize = machines
+    let presses: Joltage = machines
         .iter()
         .map(|m| find_minimal_presses_for_joltage(m))
         .sum();
