@@ -146,6 +146,7 @@ pub fn find_min_presses_for_indicators(m: &MachineState) -> usize {
     min_presses
 }
 pub fn find_minimal_presses_for_joltage(initial_state: &MachineState) -> usize {
+    todo!("switch to linear algebra");
     let mut unchecked_states: Vec<MachineState> = vec![initial_state.clone()];
     let mut checked_states: Vec<MachineState> = Vec::new();
     let mut solutions: Vec<MachineState> = Vec::new();
@@ -177,14 +178,6 @@ pub fn find_minimal_presses_for_joltage(initial_state: &MachineState) -> usize {
         .map(|s| s.pushes.iter().sum())
         .min()
         .unwrap()
-    // return 0;
-
-    // todo!(
-    //     r#"find_minimal_presses_for_joltage:
-    // create a vec of accumulated button presses where the joltage is under the target
-    //     press each button and add it to the stack.
-    //     then compare the finished results for the lowest score."#
-    // );
 }
 #[cfg(test)]
 mod tests {
