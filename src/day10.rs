@@ -107,7 +107,7 @@ fn push_botton(items: &[usize], new_indicators: &mut [Indicator], active_joltage
         active_joltage[*light_index] += 1;
     }
 }
-pub fn find_min_presses(m: &MachineState) -> usize {
+pub fn find_min_presses_for_indicators(m: &MachineState) -> usize {
     let len = m.instructions.buttons.len();
     let max_button_state: usize = 1 << (len);
     let mut min_presses = len;
@@ -137,14 +137,17 @@ pub fn x() {}
 mod tests {
     use super::*;
     #[test]
-    fn test_find_minimal_presses() {
+    fn test_find_minimal_presses_for_indicators() {
         // arrange
         let machines: Vec<MachineState> = sample_data()
             .iter()
             .map(|d| MachineState::from_instructions(&parse_machine_instructions(d)))
             .collect();
         // act
-        let actual: Vec<usize> = machines.iter().map(|m| find_min_presses(m)).collect();
+        let actual: Vec<usize> = machines
+            .iter()
+            .map(|m| find_min_presses_for_indicators(m))
+            .collect();
         // assert
         assert_eq!(actual, [2, 3, 2])
     }

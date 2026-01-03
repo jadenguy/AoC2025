@@ -237,7 +237,10 @@ fn run_day10() {
         // .take(1)
         .collect();
     // act
-    let presses: usize = machines.iter().map(|m| find_min_presses(m)).sum();
+    let presses: usize = machines
+        .iter()
+        .map(|m| find_min_presses_for_indicators(m))
+        .sum();
     println!("Day 10 Part 1: Min Presses {}", presses)
 }
 fn run_day11() {
