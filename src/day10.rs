@@ -21,7 +21,7 @@ pub fn parse_machine_instructions(d: &str) -> MachineDefinition {
     let mut joltage: Vec<Joltage> = Vec::new();
     let mut parse_state = ParseState::Indicator;
     let mut buffer: String = String::from("");
-    let mut current_buttons: ButtonDefinition = Vec::new();
+    let mut button_definition_buffer: ButtonDefinition = Vec::new();
     for c in d.chars() {
         match (c, &parse_state) {
             (']', _) => {
@@ -42,13 +42,13 @@ pub fn parse_machine_instructions(d: &str) -> MachineDefinition {
                 buffer.clear();
             }
             (',', ParseState::Button) => {
-                current_buttons.push(buffer.parse().unwrap());
+                button_definition_buffer.push(buffer.parse().unwrap());
                 buffer.clear();
             }
             (')', ParseState::Button) => {
-                current_buttons.push(buffer.parse().unwrap());
-                buttons.push(current_buttons.clone());
-                current_buttons.clear();
+                button_definition_buffer.push(buffer.parse().unwrap());
+                buttons.push(button_definition_buffer.clone());
+                button_definition_buffer.clear();
             }
             ('}', ParseState::Jolt) | (',', ParseState::Jolt) => {
                 joltage.push(buffer.parse().unwrap());
