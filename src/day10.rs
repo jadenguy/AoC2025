@@ -7,7 +7,7 @@ type Joltage = usize;
 pub struct MachineDefinition {
     wanted_indicator_state: Vec<Indicator>,
     buttons: Vec<ButtonDefinition>,
-    joltage: Vec<Joltage>,
+    wanted_joltage: Vec<Joltage>,
 }
 
 pub fn parse_machine_instructions(d: &str) -> MachineDefinition {
@@ -62,24 +62,27 @@ pub fn parse_machine_instructions(d: &str) -> MachineDefinition {
     MachineDefinition {
         wanted_indicator_state: wanted_indicator,
         buttons,
-        joltage,
+        wanted_joltage: joltage,
     }
 }
 #[derive(Debug, PartialEq, Eq, PartialOrd, Ord, Clone)]
 pub struct MachineState {
     pub lit_indicators: Vec<Indicator>,
+    pub active_joltage: Vec<Joltage>,
     pub instructions: MachineDefinition,
 }
 
 impl MachineState {
     pub fn push_button(&self, button_index: &usize) -> MachineState {
         let instructions = self.instructions.to_owned();
-        let mut new_indicators = self.lit_indicators.to_owned();
+        let mut lit_indicators = self.lit_indicators.to_owned();
+        let mut active_joltage = self.active_joltage.to_owned();
         let items = &instructions.buttons[*button_index];
-        push_botton(&mut new_indicators, items);
+        push_botton(items, &mut lit_indicators, &mut active_joltage);
         MachineState {
-            lit_indicators: new_indicators,
+            lit_indicators,
             instructions,
+            active_joltage,
         }
     }
     pub fn is_on(&self) -> bool {
@@ -93,13 +96,15 @@ impl MachineState {
         MachineState {
             instructions,
             lit_indicators: iter::repeat(0).take(n).collect(),
+            active_joltage: iter::repeat(0).take(n).collect(),
         }
     }
 }
 
-fn push_botton(new_indicators: &mut [u8], items: &[usize]) {
+fn push_botton(items: &[usize], new_indicators: &mut [Indicator], active_joltage: &mut [Joltage]) {
     for light_index in items {
         new_indicators[*light_index] = (1 + new_indicators[*light_index]) % 2;
+        active_joltage[*light_index] += 1;
     }
 }
 pub fn find_min_presses(m: &MachineState) -> usize {
@@ -147,6 +152,7 @@ mod tests {
     fn test_push_botton_on_state() {
         let initial = MachineState {
             lit_indicators: vec![0, 0, 0, 0],
+            active_joltage: vec![0, 0, 0, 0],
             instructions: MachineDefinition {
                 wanted_indicator_state: vec![0, 1, 1, 0],
                 buttons: vec![
@@ -157,7 +163,7 @@ mod tests {
                     vec![0, 2], //4
                     vec![0, 1], //5
                 ],
-                joltage: vec![3, 5, 4, 7],
+                wanted_joltage: vec![3, 5, 4, 7],
             },
         };
         assert_eq!(initial.push_button(&0).lit_indicators, [0, 0, 0, 1]);
@@ -172,11 +178,16 @@ mod tests {
             initial.push_button(&3).push_button(&5).lit_indicators,
             [1, 1, 1, 1]
         );
+        assert_eq!(
+            initial.push_button(&0).push_button(&0).active_joltage,
+            [0, 0, 0, 2]
+        );
     }
     #[test]
     fn test_state_from_instruction() {
         let expected = MachineState {
             lit_indicators: vec![0, 0, 0, 0],
+            active_joltage: vec![0, 0, 0, 0],
             instructions: MachineDefinition {
                 wanted_indicator_state: vec![0, 1, 1, 0],
                 buttons: vec![
@@ -187,7 +198,7 @@ mod tests {
                     vec![0, 2],
                     vec![0, 1],
                 ],
-                joltage: vec![3, 5, 4, 7],
+                wanted_joltage: vec![3, 5, 4, 7],
             },
         };
         let actual = MachineState::from_instructions(&expected.instructions);
@@ -197,9 +208,10 @@ mod tests {
     fn test_push_button() {
         let button: &[usize] = &[0, 2];
         let expected_output = [1u8, 1, 0, 0];
-        let mut actual_output = [0u8, 1, 1, 0];
-        push_botton(&mut actual_output, button);
-        assert_eq!(actual_output, expected_output);
+        let mut actual_indicators = [0u8, 1, 1, 0];
+        let mut actual_joltage = [0usize, 0, 0, 0];
+        push_botton(button, &mut actual_indicators, &mut actual_joltage);
+        assert_eq!(actual_indicators, expected_output);
     }
     #[test]
     fn test_parse_tiles() {
@@ -223,7 +235,7 @@ mod tests {
                         vec![0, 2],
                         vec![0, 1]
                     ],
-                    joltage: vec![3, 5, 4, 7]
+                    wanted_joltage: vec![3, 5, 4, 7]
                 },
                 MachineDefinition {
                     wanted_indicator_state: vec![0, 0, 0, 1, 0],
@@ -234,7 +246,7 @@ mod tests {
                         vec![0, 1, 2],
                         vec![1, 2, 3, 4]
                     ],
-                    joltage: vec![7, 5, 12, 7, 2]
+                    wanted_joltage: vec![7, 5, 12, 7, 2]
                 },
                 MachineDefinition {
                     wanted_indicator_state: vec![0, 1, 1, 1, 0, 1],
@@ -244,7 +256,7 @@ mod tests {
                         vec![0, 1, 2, 4, 5],
                         vec![1, 2]
                     ],
-                    joltage: vec![10, 11, 11, 5, 10, 5]
+                    wanted_joltage: vec![10, 11, 11, 5, 10, 5]
                 }
             ]
         )
