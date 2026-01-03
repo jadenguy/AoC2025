@@ -132,10 +132,32 @@ pub fn find_min_presses_for_indicators(m: &MachineState) -> usize {
     }
     min_presses
 }
-pub fn x() {}
+pub fn find_minimal_presses_for_joltage(m: &MachineState) -> usize {
+    todo!(
+        r#"find_minimal_presses_for_joltage:
+    create a vec of accumulated button presses where the joltage is under the target
+        press each button and add it to the stack.
+        then compare the finished results for the lowest score."#
+    )
+}
 #[cfg(test)]
 mod tests {
     use super::*;
+    #[test]
+    fn test_find_minimal_presses_for_joltage() {
+        // arrange
+        let machines: Vec<MachineState> = sample_data()
+            .iter()
+            .map(|d| MachineState::from_instructions(&parse_machine_instructions(d)))
+            .collect();
+        // act
+        let actual: Vec<usize> = machines
+            .iter()
+            .map(|m| find_minimal_presses_for_joltage(m))
+            .collect();
+        // assert
+        assert_eq!(actual, [10, 12, 11])
+    }
     #[test]
     fn test_find_minimal_presses_for_indicators() {
         // arrange
