@@ -2,7 +2,7 @@ use std::iter;
 
 type Indicator = u8;
 type ButtonDefinition = Vec<usize>;
-type Joltage = usize;
+type Joltage = i64;
 #[derive(Debug, PartialEq, Eq, PartialOrd, Ord, Clone)]
 pub struct MachineDefinition {
     wanted_indicator_state: Vec<Indicator>,
@@ -70,6 +70,7 @@ pub struct MachineState {
     pub lit_indicators: Vec<Indicator>,
     pub active_joltage: Vec<Joltage>,
     pub instructions: MachineDefinition,
+    pub pushes: Vec<usize>,
 }
 
 impl MachineState {
@@ -77,12 +78,15 @@ impl MachineState {
         let instructions = self.instructions.to_owned();
         let mut lit_indicators = self.lit_indicators.to_owned();
         let mut active_joltage = self.active_joltage.to_owned();
+        let mut pushes = self.pushes.to_owned();
+        pushes[*button_index] += 1;
         let items = &instructions.buttons[*button_index];
         push_botton(items, &mut lit_indicators, &mut active_joltage);
         MachineState {
             lit_indicators,
             instructions,
             active_joltage,
+            pushes: pushes,
         }
     }
     pub fn is_on(&self) -> bool {
@@ -91,13 +95,22 @@ impl MachineState {
             .eq(self.instructions.wanted_indicator_state.iter())
     }
     pub fn from_instructions(instructions: &MachineDefinition) -> MachineState {
-        let instructions = instructions.to_owned();
-        let n = instructions.wanted_indicator_state.len();
+        let indicator_count = instructions.wanted_indicator_state.len();
         MachineState {
-            instructions,
-            lit_indicators: iter::repeat(0).take(n).collect(),
-            active_joltage: iter::repeat(0).take(n).collect(),
+            instructions: instructions.to_owned(),
+            lit_indicators: iter::repeat(0).take(indicator_count).collect(),
+            active_joltage: iter::repeat(0).take(indicator_count).collect(),
+            pushes: iter::repeat(0).take(instructions.buttons.len()).collect(),
         }
+    }
+
+    fn joltage_diffs(&self) -> Vec<i64> {
+        self.instructions
+            .wanted_joltage
+            .iter()
+            .zip(self.active_joltage.iter())
+            .map(|(a, b)| a - b)
+            .collect()
     }
 }
 
@@ -132,13 +145,46 @@ pub fn find_min_presses_for_indicators(m: &MachineState) -> usize {
     }
     min_presses
 }
-pub fn find_minimal_presses_for_joltage(m: &MachineState) -> usize {
-    todo!(
-        r#"find_minimal_presses_for_joltage:
-    create a vec of accumulated button presses where the joltage is under the target
-        press each button and add it to the stack.
-        then compare the finished results for the lowest score."#
-    )
+pub fn find_minimal_presses_for_joltage(initial_state: &MachineState) -> usize {
+    let mut unchecked_states: Vec<MachineState> = vec![initial_state.clone()];
+    let mut checked_states: Vec<MachineState> = Vec::new();
+    let mut solutions: Vec<MachineState> = Vec::new();
+    let button_indexes: Vec<usize> = (0..initial_state.instructions.buttons.len()).collect();
+    for button_index in button_indexes {
+        while let Some(state) = unchecked_states.pop() {
+            let mut keep_going = true;
+            let mut new_state: MachineState = state.to_owned();
+            while keep_going {
+                let tnew_state = new_state.push_button(&button_index);
+                new_state = tnew_state.clone();
+                let list_of_joltages_needed = (new_state).joltage_diffs();
+                if list_of_joltages_needed.iter().any(|&d| d < 0) {
+                    keep_going = false;
+                } else if list_of_joltages_needed.iter().all(|&d| d == 0) {
+                    solutions.push(tnew_state)
+                } else {
+                    checked_states.push(tnew_state);
+                }
+            }
+            checked_states.push(state);
+        }
+
+        unchecked_states = checked_states.to_owned();
+        checked_states.clear();
+    }
+    solutions
+        .iter()
+        .map(|s| s.pushes.iter().sum())
+        .min()
+        .unwrap()
+    // return 0;
+
+    // todo!(
+    //     r#"find_minimal_presses_for_joltage:
+    // create a vec of accumulated button presses where the joltage is under the target
+    //     press each button and add it to the stack.
+    //     then compare the finished results for the lowest score."#
+    // );
 }
 #[cfg(test)]
 mod tests {
@@ -176,6 +222,7 @@ mod tests {
     #[test]
     fn test_push_botton_on_state() {
         let initial = MachineState {
+            pushes: vec![0, 0, 0, 0, 0, 0],
             lit_indicators: vec![0, 0, 0, 0],
             active_joltage: vec![0, 0, 0, 0],
             instructions: MachineDefinition {
@@ -211,6 +258,7 @@ mod tests {
     #[test]
     fn test_state_from_instruction() {
         let expected = MachineState {
+            pushes: vec![0, 0, 0, 0, 0, 0],
             lit_indicators: vec![0, 0, 0, 0],
             active_joltage: vec![0, 0, 0, 0],
             instructions: MachineDefinition {
@@ -234,7 +282,7 @@ mod tests {
         let button: &[usize] = &[0, 2];
         let expected_output = [1u8, 1, 0, 0];
         let mut actual_indicators = [0u8, 1, 1, 0];
-        let mut actual_joltage = [0usize, 0, 0, 0];
+        let mut actual_joltage = [0, 0, 0, 0];
         push_botton(button, &mut actual_indicators, &mut actual_joltage);
         assert_eq!(actual_indicators, expected_output);
     }
