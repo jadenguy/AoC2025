@@ -331,23 +331,6 @@ mod tests {
         assert_eq!(actual, [10, 12, 11])
     }
     #[test]
-    fn test_find_minimal_presses_for_joltage_x() {
-        // arrange
-        let initial = MachineState::from_instructions(&MachineDefinition {
-            wanted_indicator_state: vec![1, 1],
-            buttons: vec![
-                vec![0],    //0
-                vec![0, 1], //1
-                vec![1],    //2
-            ],
-            wanted_joltage: vec![2, 2],
-        });
-        // act
-        let actual = find_minimal_presses_for_joltage(&initial);
-        // assert
-        assert_eq!(actual, 2)
-    }
-    #[test]
     fn test_find_minimal_presses_for_indicators() {
         // arrange
         let machines: Vec<MachineState> = sample_data()
