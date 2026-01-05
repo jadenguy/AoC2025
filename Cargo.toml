@@ -6,5 +6,5 @@ edition = "2024"
 [lib]
 path = "src/lib.rs"
 
-[dependencies]
-good_lp = { version = "1.14.2", default-features = false, features = ["coin_cbc"] }
+# [dependencies]
+# good_lp = { version = "1.14.2", default-features = false, features = ["coin_cbc"] }

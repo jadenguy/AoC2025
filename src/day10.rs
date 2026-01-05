@@ -1,5 +1,5 @@
 // use good_lp::solvers::coin_cbc::*;
-use good_lp::*;
+// use good_lp::*;
 use std::iter;
 
 type Indicator = u8;
@@ -147,45 +147,45 @@ pub fn find_min_presses_for_indicators(m: &MachineState) -> usize {
     min_presses
 }
 pub fn find_minimal_presses_for_joltage(state: &MachineState) -> Joltage {
-    let presses = find_minimal_presses_for_joltage_linear_unwrapped(state);
-    let joltage_print: Vec<String> = state
-        .instructions
-        .wanted_joltage
-        .iter()
-        .map(|z| z.to_string())
-        .collect();
-    let button_print: Vec<String> = state
-        .instructions
-        .buttons
-        .iter()
-        .map(|z| -> Vec<String> { z.iter().map(|n| n.to_string()).collect() })
-        .map(|z| z.join(","))
-        .collect();
-    println!(
-        "{} buttons ({})",
-        joltage_print.join("|"),
-        button_print.join("),(")
-    );
+    let presses = find_minimal_presses_for_joltage_brute_force(state);
+    // let joltage_print: Vec<String> = state
+    //     .instructions
+    //     .wanted_joltage
+    //     .iter()
+    //     .map(|z| z.to_string())
+    //     .collect();
+    // let button_print: Vec<String> = state
+    //     .instructions
+    //     .buttons
+    //     .iter()
+    //     .map(|z| -> Vec<String> { z.iter().map(|n| n.to_string()).collect() })
+    //     .map(|z| z.join(","))
+    //     .collect();
+    // println!(
+    //     "{} buttons ({})",
+    //     joltage_print.join("|"),
+    //     button_print.join("),(")
+    // );
     let mut temp_state = state.to_owned();
     for (button_index, press_count) in presses.iter().enumerate() {
-        let button_print: Vec<String> = state.instructions.buttons[button_index]
-            .iter()
-            .map(|z| z.to_string())
-            .collect();
+        // let button_print: Vec<String> = state.instructions.buttons[button_index]
+        //     .iter()
+        //     .map(|z| z.to_string())
+        //     .collect();
         for _p in 0..*press_count {
             temp_state = temp_state.push_button(&button_index)
         }
-        let active_state: Vec<String> = temp_state
-            .active_joltage
-            .iter()
-            .map(|z| z.to_string())
-            .collect();
-        println!(
-            "  ({}) pressed {} times, arriving at {}",
-            button_print.join(","),
-            press_count,
-            active_state.join("|")
-        );
+        // let active_state: Vec<String> = temp_state
+        //     .active_joltage
+        //     .iter()
+        //     .map(|z| z.to_string())
+        //     .collect();
+        // println!(
+        //     "  ({}) pressed {} times, arriving at {}",
+        //     button_print.join(","),
+        //     press_count,
+        //     active_state.join("|")
+        // );
     }
     if temp_state.joltage_diffs().iter().any(|&x| x != 0) {
         panic!("wrong answer")
@@ -194,104 +194,103 @@ pub fn find_minimal_presses_for_joltage(state: &MachineState) -> Joltage {
     println!("sum {}", sum);
     sum
 }
+// fn find_minimal_presses_for_joltage_linear_unwrapped(state: &MachineState) -> Vec<Joltage> {
+//     find_minimal_presses_for_joltage_linear(state).unwrap()
+// }
+// fn find_minimal_presses_for_joltage_linear(
+//     state: &MachineState,
+// ) -> Result<Vec<Joltage>, ResolutionError> {
+//     let def = &state.instructions;
+//     let num_buttons = def.buttons.len();
+//     let num_counters = def.wanted_joltage.len();
 
-fn find_minimal_presses_for_joltage_linear_unwrapped(state: &MachineState) -> Vec<Joltage> {
-    find_minimal_presses_for_joltage_linear(state).unwrap()
-}
-fn find_minimal_presses_for_joltage_linear(
-    state: &MachineState,
-) -> Result<Vec<Joltage>, ResolutionError> {
-    let def = &state.instructions;
-    let num_buttons = def.buttons.len();
-    let num_counters = def.wanted_joltage.len();
+//     // Create variable builder
+//     let mut vars = variables!();
 
-    // Create variable builder
-    let mut vars = variables!();
+//     // One integer variable per button
+//     let button_vars: Vec<Variable> = (0..num_buttons)
+//         .map(|_| vars.add(variable().integer().min(0)))
+//         .collect();
 
-    // One integer variable per button
-    let button_vars: Vec<Variable> = (0..num_buttons)
-        .map(|_| vars.add(variable().integer().min(0)))
-        .collect();
+//     // Objective: minimize total button presses
+//     let mut problem = vars
+//         .minimise(button_vars.iter().copied().sum::<Expression>())
+//         .using(coin_cbc);
 
-    // Objective: minimize total button presses
-    let mut problem = vars
-        .minimise(button_vars.iter().copied().sum::<Expression>())
-        .using(coin_cbc);
+//     // Build constraints dynamically
+//     for counter_idx in 0..num_counters {
+//         let mut expr = Expression::from(0);
 
-    // Build constraints dynamically
-    for counter_idx in 0..num_counters {
-        let mut expr = Expression::from(0);
+//         for (button_idx, button_def) in def.buttons.iter().enumerate() {
+//             if button_def.contains(&counter_idx) {
+//                 expr = expr + button_vars[button_idx];
+//             }
+//         }
 
-        for (button_idx, button_def) in def.buttons.iter().enumerate() {
-            if button_def.contains(&counter_idx) {
-                expr = expr + button_vars[button_idx];
-            }
-        }
+//         problem = problem.with(constraint!(expr == def.wanted_joltage[counter_idx] as f64));
+//     }
 
-        problem = problem.with(constraint!(expr == def.wanted_joltage[counter_idx] as f64));
-    }
+//     // Solve
+//     let solution = problem.solve()?;
 
-    // Solve
-    let solution = problem.solve()?;
+//     // Extract solution
+//     let result = button_vars
+//         .iter()
+//         .map(|v| solution.value(*v) as Joltage)
+//         .collect();
 
-    // Extract solution
-    let result = button_vars
-        .iter()
-        .map(|v| solution.value(*v) as Joltage)
-        .collect();
-
-    Ok(result)
-}
+//     Ok(result)
+// }
 fn find_minimal_presses_for_joltage_brute_force(initial_state: &MachineState) -> Vec<Joltage> {
     let mut unchecked_states: Vec<MachineState> = vec![initial_state.clone()];
     let mut next_round_states: Vec<MachineState> = Vec::new();
     let mut solutions: Vec<MachineState> = Vec::new();
     let button_indexes: Vec<usize> = (0..initial_state.instructions.buttons.len()).collect();
     for button_index in button_indexes {
-        print!("button_index {} (", button_index);
-        for b in &initial_state.instructions.buttons[button_index] {
-            print!("{},", b)
-        }
-        println!(")");
+        // print!("button_index {} (", button_index);
+        // for b in &initial_state.instructions.buttons[button_index] {
+        //     print!("{},", b)
+        // }
+        // println!(")");
         while let Some(state) = unchecked_states.pop() {
             let mut keep_going = true;
             let mut new_state: MachineState = state.to_owned();
-            let list_of_joltages_needed = (&state).joltage_diffs();
-            print!("  from ");
-            for j in &list_of_joltages_needed {
-                print!("{},", j)
-            }
-            print!("  to ");
-            for j in &list_of_joltages_needed {
-                print!("{},", j)
-            }
-            println!(" total presses {}", 0);
+            // let list_of_joltages_needed = (&state).joltage_diffs();
+            // print!("  from ");
+            // for j in &list_of_joltages_needed {
+            //     print!("{},", j)
+            // }
+            // print!("  to ");
+            // for j in &list_of_joltages_needed {
+            //     print!("{},", j)
+            // }
+            // println!(" total presses {}", 0);
 
             next_round_states.push(state);
-            let mut x = 0;
+            // let mut x = 0;
             while keep_going {
                 let temp_new_state = new_state.push_button(&button_index);
-                let list_of_joltages_needed = (new_state).joltage_diffs();
-                print!("  from ");
-                for j in &list_of_joltages_needed {
-                    print!("{},", j)
-                }
+                // let list_of_joltages_needed = (new_state).joltage_diffs();
+                // print!("  from ");
+                // for j in &list_of_joltages_needed {
+                //     print!("{},", j)
+                // }
                 new_state = temp_new_state.clone();
                 let list_of_joltages_needed = (temp_new_state).joltage_diffs();
-                print!(" to ");
-                for j in &list_of_joltages_needed {
-                    print!("{},", j)
-                }
-                x += 1;
-                println!(" total presses {}", x);
+                // print!(" to ");
+                // for j in &list_of_joltages_needed {
+                //     print!("{},", j)
+                // }
+                // x += 1;
+                // println!(" total presses {}", x);
                 if list_of_joltages_needed.iter().all(|&d| d == 0) {
                     keep_going = false;
-                    let p: Vec<String> = temp_new_state
-                        .pushes
-                        .iter()
-                        .map(|b| b.to_string())
-                        .collect();
-                    println!("       SOLUTION {}", p.join("-"));
+                    // let p: Vec<String> = temp_new_state
+                    //     .pushes
+                    //     .iter()
+                    //     .map(|b| b.to_string())
+                    //     .collect();
+                    // println!("       SOLUTION {}", p.join("-"));
                     solutions.push(temp_new_state)
                 } else if list_of_joltages_needed.iter().any(|&d| d < 0) {
                     keep_going = false;
@@ -306,15 +305,32 @@ fn find_minimal_presses_for_joltage_brute_force(initial_state: &MachineState) ->
     }
     let mut sorted_solutions = solutions;
     sorted_solutions.sort_by_key(|s| -> Joltage { s.pushes.iter().map(|&x| x.to_owned()).sum() });
-    for (i, sol) in sorted_solutions.iter().enumerate() {
-        let p: Vec<String> = sol.pushes.iter().map(|b| b.to_string()).collect();
-        println!("{} {}", i, p.join("-"))
-    }
+    // for (i, sol) in sorted_solutions.iter().enumerate() {
+    // let p: Vec<String> = sol.pushes.iter().map(|b| b.to_string()).collect();
+    // println!("{} {}", i, p.join("-"))
+    // }
     sorted_solutions.first().unwrap().pushes.to_owned()
 }
 #[cfg(test)]
 mod tests {
     use super::*;
+    #[test]
+    fn test_find_minimal_presses_for_joltage_x() {
+        // arrange
+        let initial = MachineState::from_instructions(&MachineDefinition {
+            wanted_indicator_state: vec![1, 1],
+            buttons: vec![
+                vec![0],    //0
+                vec![0, 1], //1
+                vec![1],    //2
+            ],
+            wanted_joltage: vec![2, 2],
+        });
+        // act
+        let actual = find_minimal_presses_for_joltage(&initial);
+        // assert
+        assert_eq!(actual, 2)
+    }
     #[test]
     fn test_find_minimal_presses_for_joltage() {
         // arrange
