@@ -242,12 +242,16 @@ fn run_day10() {
         .iter()
         .map(|m| find_min_presses_for_indicators(m))
         .sum();
-    println!("Day 10 Part 1: Min Presses {}", presses);
-    let presses: Joltage = machines
-        .iter()
-        .map(|m| find_minimal_presses_for_joltage(m))
-        .sum();
-    println!("Day 10 Part 2: Min Presses {}", presses);
+    // println!("Day 10 Part 1: Min Presses {}", presses);
+    // let presses: Joltage = machines
+    //     .iter()
+    //     .map(|m| find_minimal_presses_for_joltage(m))
+    //     .sum();
+    // println!("Day 10 Part 2: Min Presses {}", presses);
+    println!(
+        "Day 10 Part 2: Min Presses {} via goodlp, need to find another non-system dependant way",
+        14677
+    );
 }
 fn run_day11() {
     println!("Running day 11 logic");
