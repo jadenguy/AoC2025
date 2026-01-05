@@ -230,6 +230,7 @@ fn run_day10() {
     use aoc2025::day10::*;
     let machine_inst_list =
         read_lines("./data/day10/part1.txt").expect("Failed to read lines from file");
+    println!("{}", machine_inst_list.len());
     let machines: Vec<MachineState> = machine_inst_list
         .iter()
         // .skip(1)
