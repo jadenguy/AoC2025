@@ -1,8 +1,5 @@
 pub mod common;
-use aoc2025::{
-    day4::find_isolated_rolls_with_output, day6::convert_worksheet_to_problems_cephalopod,
-    day8::connect_junction_boxes_to_exhaustion,
-};
+
 use common::read_lines;
 use std::env;
 fn main() {
@@ -49,7 +46,7 @@ fn run_all() {
     run_day12();
 }
 fn run_day1() {
-    use aoc2025::day1::{apply_and_count_zeroes_clicks_and_final, parse_instructions};
+    use aoc2025::day1::*;
     let lines = read_lines("./data/day1/part1.txt").expect("Failed to read lines from file");
     let instructions = parse_instructions(&lines);
 
@@ -60,9 +57,7 @@ fn run_day1() {
 }
 
 fn run_day2() {
-    use aoc2025::day2::{
-        find_invalid_ids_lexicographically, find_invalid_ids_lexicographically_by_two,
-    };
+    use aoc2025::day2::*;
     let lines = read_lines("./data/day2/part1.txt").expect("Failed to read lines from file");
     let invalid_ids = lines
         .first()
@@ -89,7 +84,7 @@ fn run_day2() {
 }
 
 fn run_day3() {
-    use aoc2025::day3::largest_joltage;
+    use aoc2025::day3::*;
     let lines = read_lines("./data/day3/part1.txt").expect("Failed to read lines from file");
     let invalid_ids = lines
         .iter()
@@ -103,11 +98,7 @@ fn run_day3() {
     println!("Day 3 Part 2: Jolt total {}", invalid_ids);
 }
 fn run_day4() {
-    use aoc2025::day4::{
-        convert_lines_to_board,
-        find_isolated_rolls,
-        // print_board,
-    };
+    use aoc2025::day4::*;
     {
         let rows = read_lines("./data/day4/part1.txt").expect("Failed to read lines from file");
         let board = convert_lines_to_board(rows);
@@ -134,7 +125,7 @@ fn run_day4() {
 }
 
 fn run_day5() {
-    use aoc2025::day5::{count_fresh_ingredients, parse_db, total_fresh_ids};
+    use aoc2025::day5::*;
     let db_file = read_lines("./data/day5/part1.txt").expect("Failed to read lines from file");
     let db = parse_db(db_file);
     let ingredient_count = count_fresh_ingredients(&db);
@@ -143,7 +134,7 @@ fn run_day5() {
     println!("Day 5 Part 2: All fresh IDs possible {}", id_count);
 }
 fn run_day6() {
-    use aoc2025::day6::{convert_worksheet_to_problems, generate_ast_from_problem};
+    use aoc2025::day6::*;
 
     let worksheet = read_lines("./data/day6/part1.txt").expect("Failed to read lines from file");
 
@@ -184,7 +175,7 @@ fn run_day6() {
     );
 }
 fn run_day7() {
-    use aoc2025::day7::{parse_manifold_strings, process_manifold};
+    use aoc2025::day7::*;
     let manifold_initial_state =
         read_lines("./data/day7/part1.txt").expect("Failed to read lines from file");
     let manifold =
@@ -194,7 +185,7 @@ fn run_day7() {
     println!("Day 7 Part 2: Manifold beam paths {}", proc.1);
 }
 fn run_day8() {
-    use aoc2025::day8::{connect_junction_boxes_n_times, parse_junction_boxes};
+    use aoc2025::day8::*;
     let junction_box_strings =
         read_lines("./data/day8/part1.txt").expect("Failed to read lines from file");
     let jbox: Vec<&str> = junction_box_strings.iter().map(|l| l.as_str()).collect();
@@ -215,7 +206,7 @@ fn run_day8() {
     );
 }
 fn run_day9() {
-    use aoc2025::day9::{furthest_red_green_tiles, furthest_tiles, parse_tiles};
+    use aoc2025::day9::*;
     let tile_string = read_lines("./data/day9/part1.txt").expect("Failed to read lines from file");
     let tiles = parse_tiles(tile_string.iter().map(|x| x.as_str()).collect());
 
@@ -230,7 +221,6 @@ fn run_day10() {
     use aoc2025::day10::*;
     let machine_inst_list =
         read_lines("./data/day10/part1.txt").expect("Failed to read lines from file");
-    println!("{}", machine_inst_list.len());
     let machines: Vec<MachineState> = machine_inst_list
         .iter()
         // .skip(1)
@@ -254,7 +244,18 @@ fn run_day10() {
     );
 }
 fn run_day11() {
-    println!("Running day 11 logic");
+    use aoc2025::day11::*;
+    let lines = read_lines("./data/day11/part1.txt").expect("Failed to read lines from file");
+    let x = Reactor::from_string(lines);
+    println!(
+        "Day 11 Part 1: Paths from You to Out {}",
+        x.count_paths("you", "out")
+    );
+
+    println!(
+        "Day 11 Part 2: Paths from You to Out {}",
+        x.count_paths("svr", "out")
+    );
 }
 fn run_day12() {
     println!("Running day 12 logic");

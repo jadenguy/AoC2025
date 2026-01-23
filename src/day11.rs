@@ -1,27 +1,76 @@
+pub mod linked_list;
 use std::collections::HashMap;
-type Node = String;
-#[derive(Debug, PartialEq)]
-pub struct Reactor {
-    pub network: HashMap<Node, Vec<Node>>,
-}
 
+use crate::day11::linked_list::*;
+
+#[derive(Debug)]
+pub struct Reactor {
+    pub network: HashMap<NodeValue, Vec<NodeValue>>,
+}
 impl Reactor {
     pub fn from_str(lines: Vec<&str>) -> Reactor {
         let mut network = HashMap::new();
         for line in lines {
             let (key, value) = line.split_once(": ").unwrap();
             network.insert(
-                Node::from(key),
-                value.split(" ").map(|x| Node::from(x)).collect(),
+                NodeValue::from(key),
+                value.split(" ").map(|x| NodeValue::from(x)).collect(),
             );
         }
         Reactor { network }
     }
+    pub fn from_string(lines: Vec<String>) -> Reactor {
+        Reactor::from_str(lines.iter().map(|x| x.as_str()).collect())
+    }
+    pub fn count_paths(&self, start_node: &str, end_node: &str) -> usize {
+        self.iter_paths(start_node, end_node).len()
+    }
+
+    fn iter_paths(&self, start_node: &str, end_node: &str) -> Vec<LinkedListNode> {
+        let mut to_check: Vec<LinkedListNode> =
+            vec![LinkedListNode::from_str_with_child(start_node, None)];
+        let mut successful: Vec<LinkedListNode> = Vec::new();
+        println!("{:?}", to_check);
+        while let Some(node) = to_check.pop() {
+            if let Some(connections) = self.network.get(&node.tail()) {
+                for connection in connections {
+                    let new_link = node.append(connection.to_owned());
+                    println!("{}", new_link);
+                    if connection == end_node {
+                        println!("saving {}", new_link);
+                        successful.push(new_link);
+                    } else {
+                        to_check.push(new_link)
+                    }
+                }
+            }
+        }
+        successful
+    }
+    // fn count_paths_brute_force(&self, start_node: &str, end_node: &str) -> u64 {
+    //     let mut visited: Vec<String> = Vec::new();
+    //     let mut to_check: Vec<String> = vec![start_node.to_string()];
+    //     let mut successful: u64 = 0;
+    //     while let Some(node) = to_check.pop() {
+    //         if let Some(connections) = self.network.get(&node) {
+    //             for connection in connections {
+    //                 to_check.push(connection.clone());
+    //             }
+    //             // println!("{:?}", to_check)
+    //         }
+    //         if node == end_node {
+    //             successful += 1;
+    //         }
+    //         visited.push(node);
+    //     }
+    //     successful
+    // }
 }
 
 #[cfg(test)]
 mod tests {
     use super::*;
+
     // stolen from somewhere?
     macro_rules! map {
         ($($k:expr => $v:expr),* $(,)?) => {
@@ -31,11 +80,22 @@ mod tests {
         };
     }
     #[test]
+    fn test_count_paths() {
+        let reactor: Reactor = Reactor::from_str(sample_data());
+        let paths = reactor.count_paths("you", "out");
+        assert_eq!(paths, 5);
+    }
+    #[test]
+    fn test_count_paths_p2() {
+        let reactor: Reactor = Reactor::from_str(sample_data_p2());
+        let paths = reactor.count_paths("you", "out");
+
+        assert_eq!(paths, 5);
+    }
+    #[test]
     fn test_parse_reactor() {
         let sample_data = sample_data();
         let reactor: Reactor = Reactor::from_str(sample_data);
-        println!("{:?}", reactor.network);
-
         let n = map!(
             "aaa"=> ["you", "hhh"],
             "you"=> ["bbb", "ccc"],
@@ -61,6 +121,24 @@ mod tests {
             ggg: out
             hhh: ccc fff iii
             iii: out"#
+            .split("\n")
+            .map(|x| x.trim())
+            .collect()
+    }
+    fn sample_data_p2() -> Vec<&'static str> {
+        r#" svr: aaa bbb
+            aaa: fft
+            fft: ccc
+            bbb: tty
+            tty: ccc
+            ccc: ddd eee
+            ddd: hub
+            hub: fff
+            eee: dac
+            dac: fff
+            fff: ggg hhh
+            ggg: out
+            hhh: out"#
             .split("\n")
             .map(|x| x.trim())
             .collect()
