@@ -30,12 +30,11 @@ impl Reactor {
         let mut to_check: Vec<LinkedListNode> =
             vec![LinkedListNode::from_str_with_child(start_node, None)];
         let mut successful: Vec<LinkedListNode> = Vec::new();
-        println!("{:?}", to_check);
         while let Some(node) = to_check.pop() {
             if let Some(connections) = self.network.get(&node.tail()) {
                 for connection in connections {
                     let new_link = node.append(connection.to_owned());
-                    println!("{}", new_link);
+                    println!("  {}", new_link);
                     if connection == end_node {
                         println!("saving {}", new_link);
                         successful.push(new_link);
@@ -66,7 +65,36 @@ impl Reactor {
     //     successful
     // }
 }
+fn contains_noncontiguous_sequence(
+    path: LinkedListNode,
+    nodes_needed: &[String],
+) -> Option<LinkedListNode> {
+    println!("{}", path);
+    let mut last_node_position = 0;
+    for node in nodes_needed {
+        if let Some(node_position) = path
+            .iter_values()
+            .map(|d| d.to_owned())
+            .position(|n| n == *node)
+            && node_position >= last_node_position
+        {
+            last_node_position = node_position;
+        } else {
+            return None;
+        }
+    }
+    Some(path)
+}
 
+pub fn filter_contains_noncontiguous_sequence(
+    paths: Vec<LinkedListNode>,
+    nodes_needed: Vec<NodeValue>,
+) -> Vec<LinkedListNode> {
+    paths
+        .into_iter()
+        .filter_map(|path| contains_noncontiguous_sequence(path, &nodes_needed))
+        .collect()
+}
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -75,7 +103,7 @@ mod tests {
     macro_rules! map {
         ($($k:expr => $v:expr),* $(,)?) => {
             HashMap::from([
-                $(($k.to_string(), $v.iter().map(|s| s.to_string()).collect()),)*
+                $((NodeValue::from($k), $v.iter().map(|&s| NodeValue::from(s)).collect()),)*
             ])
         };
     }
@@ -88,9 +116,13 @@ mod tests {
     #[test]
     fn test_count_paths_p2() {
         let reactor: Reactor = Reactor::from_str(sample_data_p2());
-        let paths = reactor.count_paths("you", "out");
+        println!("{:?}", reactor.network);
+        let paths = reactor.iter_paths("svr", "out");
+        let nodes_needed = vec!["dac".to_string(), "fft".to_string()];
 
-        assert_eq!(paths, 5);
+        let valid_paths = filter_contains_noncontiguous_sequence(paths, nodes_needed);
+        let matching_path_count = valid_paths.len();
+        assert_eq!(matching_path_count, 2);
     }
     #[test]
     fn test_parse_reactor() {

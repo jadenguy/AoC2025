@@ -87,10 +87,7 @@ impl<'a> Iterator for LinkedListNodeIterator<'a> {
 
     fn next(&mut self) -> Option<Self::Item> {
         let current = self.cursor?;
-
-        // advance cursor by borrowing the next node
         self.cursor = current.child.as_deref();
-
         Some(current)
     }
 }
