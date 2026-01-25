@@ -1,8 +1,8 @@
 pub mod common;
 
 use common::read_lines;
-use std::env;
 fn main() {
+    use std::env;
     let args: Vec<String> = env::args().collect();
     if args.iter().count() == 1 {
         run_all();
@@ -244,17 +244,20 @@ fn run_day10() {
     );
 }
 fn run_day11() {
+    use aoc2025::day11::reactor::Reactor;
     use aoc2025::day11::*;
     let lines = read_lines("./data/day11/part1.txt").expect("Failed to read lines from file");
-    let x = Reactor::from_string(lines);
+    let reactor = Reactor::from_string(lines);
     println!(
         "Day 11 Part 1: Paths from You to Out {}",
-        x.count_paths("you", "out")
+        reactor.count_paths("you", "out")
     );
 
+    let matching_path_count =
+        count_paths_containing_nodes("svr", "out", reactor, vec!["dac", "fft"]);
     println!(
-        "Day 11 Part 2: Paths from You to Out {}",
-        x.count_paths("svr", "out")
+        "Day 11 Part 2: Paths from SVR to OUT passing DAC and FFT {}",
+        matching_path_count
     );
 }
 fn run_day12() {

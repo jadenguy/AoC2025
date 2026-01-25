@@ -1,6 +1,5 @@
-use core::fmt;
-pub type NodeValue = String;
-
+use crate::day11::node_value::*;
+use std::fmt;
 #[derive(Debug)]
 pub struct LinkedListNode {
     pub value: NodeValue,
@@ -9,7 +8,7 @@ pub struct LinkedListNode {
 impl LinkedListNode {
     pub fn from_str_with_child(value: &str, child: Option<LinkedListNode>) -> LinkedListNode {
         LinkedListNode {
-            value: value.to_string(),
+            value: NodeValue::from(value),
             child: match child {
                 Some(c) => Some(Box::from(c)),
                 None => None,
@@ -54,17 +53,20 @@ impl fmt::Display for LinkedListNode {
 
 impl LinkedListNode {
     pub fn append(&self, value: NodeValue) -> LinkedListNode {
-        let mut vec = Vec::from_iter(self.iter_values().map(|v| v.to_string()));
+        let mut vec = Vec::from_iter(self.iter_values().map(|v| NodeValue::from(v)));
         vec.push(value);
         LinkedListNode::from_vec(vec).unwrap()
     }
     pub fn prepend(&self, value: NodeValue) -> LinkedListNode {
         let mut vec = vec![value];
-        vec.extend(self.iter_values().map(|v| v.to_string()));
+        vec.extend(self.iter_values().map(|v| NodeValue::from(v)));
         LinkedListNode::from_vec(vec).unwrap()
     }
     pub fn clone(&self) -> LinkedListNode {
-        LinkedListNode::from_vec(Vec::from_iter(self.iter_values().map(|v| v.to_string()))).unwrap()
+        LinkedListNode::from_vec(Vec::from_iter(
+            self.iter_values().map(|v| NodeValue::from(v)),
+        ))
+        .unwrap()
     }
     pub fn iter(&self) -> LinkedListNodeIterator<'_> {
         LinkedListNodeIterator { cursor: Some(self) }
@@ -77,11 +79,6 @@ impl LinkedListNode {
 pub struct LinkedListNodeIterator<'a> {
     cursor: Option<&'a LinkedListNode>,
 }
-#[derive(Debug)]
-pub struct LinkedListNodeValueIterator<'a> {
-    cursor: Option<&'a LinkedListNode>,
-}
-
 impl<'a> Iterator for LinkedListNodeIterator<'a> {
     type Item = &'a LinkedListNode;
 
@@ -90,6 +87,11 @@ impl<'a> Iterator for LinkedListNodeIterator<'a> {
         self.cursor = current.child.as_deref();
         Some(current)
     }
+}
+
+#[derive(Debug)]
+pub struct LinkedListNodeValueIterator<'a> {
+    cursor: Option<&'a LinkedListNode>,
 }
 impl<'a> Iterator for LinkedListNodeValueIterator<'a> {
     type Item = &'a NodeValue;
@@ -107,9 +109,9 @@ mod tests {
     #[test]
     fn test_linked_list_node_from_vec() {
         let root = LinkedListNode::from_vec(vec![
-            "root".to_string(),
-            "child".to_string(),
-            "leaf".to_string(),
+            NodeValue::from("root"),
+            NodeValue::from("child"),
+            NodeValue::from("leaf"),
         ])
         .unwrap();
         let value_list = Vec::from_iter(root.iter_values());
@@ -118,9 +120,9 @@ mod tests {
     #[test]
     fn test_linked_list_node_clone() {
         let root = LinkedListNode::from_vec(vec![
-            "root".to_string(),
-            "child".to_string(),
-            "leaf".to_string(),
+            NodeValue::from("root"),
+            NodeValue::from("child"),
+            NodeValue::from("leaf"),
         ])
         .unwrap();
         let clone = root.clone();
