@@ -163,7 +163,7 @@ pub enum LineSegment {
 mod tests {
     use std::collections::HashSet;
 
-    use crate::day9::{Coordinate, furthest_red_green_tiles, furthest_tiles, parse_tiles};
+    use super::*;
 
     #[test]
     fn test_furthest_tiles() {

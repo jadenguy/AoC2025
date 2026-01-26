@@ -146,11 +146,7 @@ impl Expression {
 }
 #[cfg(test)]
 mod tests {
-    use crate::day6::{
-        convert_worksheet_to_problems, convert_worksheet_to_problems_cephalopod,
-        generate_ast_from_problem,
-    };
-
+    use super::*;
     #[test]
     fn test_convert_worksheet_to_problems_cephalopod() {
         // arrange

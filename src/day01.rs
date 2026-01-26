@@ -124,7 +124,7 @@ pub fn apply_and_count_zeroes_clicks_and_final(
 
 #[cfg(test)]
 mod tests {
-    use crate::day1::{apply_and_count_zeroes_clicks_and_final, parse_instructions};
+    use super::*;
 
     #[test]
     fn test_count_zero_clicks_and_positions_with_sample_data() {

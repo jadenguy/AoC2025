@@ -10,15 +10,15 @@ fn main() {
         for day in args.iter().skip(1) {
             let var_name = day.as_str();
             match var_name {
-                "day1" => run_day1(),
-                "day2" => run_day2(),
-                "day3" => run_day3(),
-                "day4" => run_day4(),
-                "day5" => run_day5(),
-                "day6" => run_day6(),
-                "day7" => run_day7(),
-                "day8" => run_day8(),
-                "day9" => run_day9(),
+                "day01" => run_day01(),
+                "day02" => run_day02(),
+                "day03" => run_day03(),
+                "day04" => run_day04(),
+                "day05" => run_day05(),
+                "day06" => run_day06(),
+                "day07" => run_day07(),
+                "day08" => run_day08(),
+                "day09" => run_day09(),
                 "day10" => run_day10(),
                 "day11" => run_day11(),
                 "day12" => run_day12(),
@@ -32,22 +32,22 @@ fn main() {
 }
 
 fn run_all() {
-    run_day1();
-    run_day2();
-    run_day3();
-    run_day4();
-    run_day5();
-    run_day6();
-    run_day7();
-    run_day8();
-    run_day9();
+    run_day01();
+    run_day02();
+    run_day03();
+    run_day04();
+    run_day05();
+    run_day06();
+    run_day07();
+    run_day08();
+    run_day09();
     run_day10();
     run_day11();
     run_day12();
 }
-fn run_day1() {
-    use aoc2025::day1::*;
-    let lines = read_lines("./data/day1/part1.txt").expect("Failed to read lines from file");
+fn run_day01() {
+    use aoc2025::day01::*;
+    let lines = read_lines("./data/day01/part1.txt").expect("Failed to read lines from file");
     let instructions = parse_instructions(&lines);
 
     let (total_zero_dials, total_clicks, _final_dial) =
@@ -56,9 +56,9 @@ fn run_day1() {
     println!("Day 2 Part 2: Your password is {}", total_clicks);
 }
 
-fn run_day2() {
-    use aoc2025::day2::*;
-    let lines = read_lines("./data/day2/part1.txt").expect("Failed to read lines from file");
+fn run_day02() {
+    use aoc2025::day02::*;
+    let lines = read_lines("./data/day02/part1.txt").expect("Failed to read lines from file");
     let invalid_ids = lines
         .first()
         .unwrap()
@@ -83,9 +83,9 @@ fn run_day2() {
     println!("Day 2 Part 2: Invalids IDs sum to {}", invalid_ids);
 }
 
-fn run_day3() {
-    use aoc2025::day3::*;
-    let lines = read_lines("./data/day3/part1.txt").expect("Failed to read lines from file");
+fn run_day03() {
+    use aoc2025::day03::*;
+    let lines = read_lines("./data/day03/part1.txt").expect("Failed to read lines from file");
     let invalid_ids = lines
         .iter()
         .map(|l| largest_joltage(l.to_owned(), 2).parse::<u64>().unwrap())
@@ -97,16 +97,16 @@ fn run_day3() {
         .sum::<u64>();
     println!("Day 3 Part 2: Jolt total {}", invalid_ids);
 }
-fn run_day4() {
-    use aoc2025::day4::*;
+fn run_day04() {
+    use aoc2025::day04::*;
     {
-        let rows = read_lines("./data/day4/part1.txt").expect("Failed to read lines from file");
+        let rows = read_lines("./data/day04/part1.txt").expect("Failed to read lines from file");
         let board = convert_lines_to_board(rows);
         let isolated_rows = find_isolated_rolls(board);
         println!("Day 4 Part 1: Isolated rolls count {}", isolated_rows);
     }
     {
-        let rows = read_lines("./data/day4/part1.txt").expect("Failed to read lines from file");
+        let rows = read_lines("./data/day04/part1.txt").expect("Failed to read lines from file");
         let mut board = convert_lines_to_board(rows);
         let mut all_found = 0usize;
         let mut found = 1;
@@ -124,19 +124,19 @@ fn run_day4() {
     }
 }
 
-fn run_day5() {
-    use aoc2025::day5::*;
-    let db_file = read_lines("./data/day5/part1.txt").expect("Failed to read lines from file");
+fn run_day05() {
+    use aoc2025::day05::*;
+    let db_file = read_lines("./data/day05/part1.txt").expect("Failed to read lines from file");
     let db = parse_db(db_file);
     let ingredient_count = count_fresh_ingredients(&db);
     println!("Day 5 Part 1: Fresh ingredient count {}", ingredient_count);
     let id_count = total_fresh_ids(&db);
     println!("Day 5 Part 2: All fresh IDs possible {}", id_count);
 }
-fn run_day6() {
-    use aoc2025::day6::*;
+fn run_day06() {
+    use aoc2025::day06::*;
 
-    let worksheet = read_lines("./data/day6/part1.txt").expect("Failed to read lines from file");
+    let worksheet = read_lines("./data/day06/part1.txt").expect("Failed to read lines from file");
 
     let problems = convert_worksheet_to_problems(&worksheet);
     let actual_sum_of_eval: i64 = problems
@@ -174,20 +174,20 @@ fn run_day6() {
         actual_sum_of_eval
     );
 }
-fn run_day7() {
-    use aoc2025::day7::*;
+fn run_day07() {
+    use aoc2025::day07::*;
     let manifold_initial_state =
-        read_lines("./data/day7/part1.txt").expect("Failed to read lines from file");
+        read_lines("./data/day07/part1.txt").expect("Failed to read lines from file");
     let manifold =
         parse_manifold_strings(manifold_initial_state.iter().map(|s| s.as_str()).collect());
     let proc = process_manifold(&manifold);
     println!("Day 7 Part 1: Manifold beam splits {}", proc.0);
     println!("Day 7 Part 2: Manifold beam paths {}", proc.1);
 }
-fn run_day8() {
-    use aoc2025::day8::*;
+fn run_day08() {
+    use aoc2025::day08::*;
     let junction_box_strings =
-        read_lines("./data/day8/part1.txt").expect("Failed to read lines from file");
+        read_lines("./data/day08/part1.txt").expect("Failed to read lines from file");
     let jbox: Vec<&str> = junction_box_strings.iter().map(|l| l.as_str()).collect();
     let junction_boxes = parse_junction_boxes(jbox);
 
@@ -205,9 +205,9 @@ fn run_day8() {
         last_connection.0.x * last_connection.1.x
     );
 }
-fn run_day9() {
-    use aoc2025::day9::*;
-    let tile_string = read_lines("./data/day9/part1.txt").expect("Failed to read lines from file");
+fn run_day09() {
+    use aoc2025::day09::*;
+    let tile_string = read_lines("./data/day09/part1.txt").expect("Failed to read lines from file");
     let tiles = parse_tiles(tile_string.iter().map(|x| x.as_str()).collect());
 
     let (_a, _b, area) =
@@ -259,5 +259,6 @@ fn run_day11() {
     );
 }
 fn run_day12() {
-    println!("Running day 12 logic");
+    let lines = read_lines("./data/day11/part1.txt").expect("Failed to read lines from file");
+    let requirement = aoc2025::day12::Requirement::from_strings(lines);
 }

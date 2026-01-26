@@ -89,7 +89,7 @@ pub struct Database {
 
 #[cfg(test)]
 mod tests {
-    use crate::day5::{count_fresh_ingredients, parse_db, total_fresh_ids};
+    use super::*;
 
     #[test]
     fn test_parse_database() {

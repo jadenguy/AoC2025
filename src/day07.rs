@@ -97,7 +97,7 @@ pub struct Manifold {
 mod tests {
     use std::collections::HashSet;
 
-    use crate::day7::{parse_manifold_strings, process_manifold};
+    use super::*;
 
     #[test]
     fn test_parse_manifold_strings() {

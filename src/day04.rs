@@ -110,9 +110,7 @@ pub fn print_board(
 
 #[cfg(test)]
 mod tests {
-    use crate::day4::{
-        convert_lines_to_board, find_isolated_rolls, find_isolated_rolls_with_output,
-    };
+    use super::*;
     #[test]
     fn test_find_rolls_p1() {
         let board_string: Vec<String> = r#"

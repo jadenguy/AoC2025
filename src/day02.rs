@@ -152,10 +152,7 @@ fn get_chunks(num_str: &str, chunk_size: usize) -> Vec<String> {
 }
 #[cfg(test)]
 mod tests {
-    use crate::day2::{
-        find_invalid_ids_lexicographically_by_two, lexicographical_lowest_bound,
-        lexicographical_upper_bound,
-    };
+    use super::*;
 
     static VERBOSE: bool = false;
 
@@ -363,8 +360,6 @@ mod tests {
         assert_eq!(invalid_ids, 1227775554)
     }
     use std::collections::HashSet;
-
-    use crate::day2::find_invalid_ids_lexicographically;
 
     #[test]
     fn find_invalid_ids_lexicographically_sample_data_n_count() {

@@ -147,10 +147,7 @@ impl JunctionBox {
 }
 #[cfg(test)]
 mod tests {
-    use crate::day8::{
-        JunctionBox, connect_junction_boxes_n_times, connect_junction_boxes_to_exhaustion,
-        parse_junction_boxes,
-    };
+    use super::*;
 
     #[test]
     fn test_connect_junction_boxes_n_times() {

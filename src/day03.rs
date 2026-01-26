@@ -27,7 +27,7 @@ pub fn largest_joltage(batteries: String, wanted_batteries: usize) -> String {
 }
 #[cfg(test)]
 mod tests {
-    use crate::day3::largest_joltage;
+    use super::*;
 
     #[test]
     fn test_largest_joltage_987654321111111_98() {
