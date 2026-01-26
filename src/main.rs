@@ -249,15 +249,13 @@ fn run_day11() {
     let lines = read_lines("./data/day11/part1.txt").expect("Failed to read lines from file");
     let reactor = Reactor::from_string(lines);
     println!(
-        "Day 11 Part 1: Paths from You to Out {}",
-        reactor.count_paths("you", "out")
+        "Day 11 Part 1: Paths from YOU to OUT {}",
+        reactor.path_iter("you", "out").count()
     );
 
-    let matching_path_count =
-        count_paths_containing_nodes("svr", "out", reactor, vec!["dac", "fft"]);
     println!(
         "Day 11 Part 2: Paths from SVR to OUT passing DAC and FFT {}",
-        matching_path_count
+        count_paths_containing_nodes("svr", "out", reactor, vec!["dac", "fft"])
     );
 }
 fn run_day12() {

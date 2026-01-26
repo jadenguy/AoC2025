@@ -4,38 +4,49 @@ use std::fmt;
 pub struct LinkedListNode {
     pub value: NodeValue,
     pub child: Option<Box<LinkedListNode>>,
+    pub tail: NodeValue,
 }
 impl LinkedListNode {
     pub fn from_str_with_child(value: &str, child: Option<LinkedListNode>) -> LinkedListNode {
-        LinkedListNode {
-            value: NodeValue::from(value),
-            child: match child {
-                Some(c) => Some(Box::from(c)),
-                None => None,
-            },
+        let value = NodeValue::from(value);
+        if let Some(c) = child {
+            let tail = c.tail.to_owned();
+            LinkedListNode {
+                child: Some(Box::from(c)),
+                tail,
+                value,
+            }
+        } else {
+            LinkedListNode {
+                tail: value.to_owned(),
+                child: None,
+                value,
+            }
         }
     }
     pub fn new(value: NodeValue) -> LinkedListNode {
-        LinkedListNode { value, child: None }
+        LinkedListNode {
+            tail: value.to_owned(),
+            child: None,
+            value,
+        }
     }
     pub fn from_vec(vec: Vec<NodeValue>) -> Option<LinkedListNode> {
-        let mut current: Option<LinkedListNode> = None;
+        let mut predecessor: Option<LinkedListNode> = None;
+        let tail = vec.last()?;
         for value in vec.iter().rev().map(|v| v.to_owned()) {
             let mut child = None;
-            if let Some(parent_node) = current {
+            if let Some(parent_node) = predecessor {
                 child = Some(Box::new(parent_node));
             }
-            let new = LinkedListNode { child, value };
-            current = Some(new);
+            let new = LinkedListNode {
+                child,
+                value,
+                tail: tail.to_owned(),
+            };
+            predecessor = Some(new);
         }
-        current
-    }
-
-    pub fn tail(&self) -> NodeValue {
-        match &self.child {
-            Some(c) => c.tail(),
-            None => self.value.to_owned(),
-        }
+        predecessor
     }
 }
 
@@ -134,14 +145,17 @@ mod tests {
     fn test_linked_list_node() {
         let leaf = LinkedListNode {
             value: NodeValue::from("leaf"),
+            tail: NodeValue::from("leaf"),
             child: None,
         };
         let child = LinkedListNode {
             value: NodeValue::from("child"),
+            tail: NodeValue::from("child"),
             child: Some(Box::from(leaf)),
         };
         let root = LinkedListNode {
             value: NodeValue::from("root"),
+            tail: NodeValue::from("root"),
             child: Some(Box::from(child)),
         };
         let l_list = Vec::from_iter(root.iter_values());

@@ -2,7 +2,7 @@ use crate::day11::node_value::*;
 
 use super::*;
 use std::collections::HashMap;
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct Reactor {
     pub network: HashMap<NodeValue, Vec<NodeValue>>,
 }
@@ -21,31 +21,50 @@ impl Reactor {
     pub fn from_string(lines: Vec<String>) -> Reactor {
         Reactor::from_str(lines.iter().map(|x| x.as_str()).collect())
     }
-    pub fn count_paths(&self, start_node: &str, end_node: &str) -> usize {
-        self.iter_paths(start_node, end_node).len()
+    pub fn path_iter(&self, start_node: &str, end_node: &str) -> ReactorPathIterator {
+        ReactorPathIterator {
+            reactor: self.clone(),
+            to_check: vec![LinkedListNode::from_str_with_child(start_node, None)],
+            end_node: NodeValue::from(end_node),
+        }
     }
 
-    pub fn iter_paths(&self, start_node: &str, end_node: &str) -> Vec<LinkedListNode> {
-        let mut to_check: Vec<LinkedListNode> =
-            vec![LinkedListNode::from_str_with_child(start_node, None)];
-        let mut successful: Vec<LinkedListNode> = Vec::new();
-        while let Some(node) = to_check.pop() {
-            if let Some(connections) = self.network.get(&node.tail()) {
+    pub(crate) fn generate_node_table(&self) -> HashMap<NodeValue, usize> {
+        let mut map = HashMap::new();
+        for (k, v_list) in &self.network {
+            map.insert(k.to_owned(), 0);
+            for v in v_list {
+                map.insert(v.to_owned(), 0);
+            }
+        }
+        map
+    }
+}
+
+#[derive(Debug)]
+pub struct ReactorPathIterator {
+    reactor: Reacter,
+    to_check: Vec<LinkedListNode>,
+    end_node: NodeValue,
+}
+impl Iterator for ReactorPathIterator {
+    type Item = LinkedListNode;
+
+    fn next(&mut self) -> Option<Self::Item> {
+        while let Some(node) = self.to_check.pop() {
+            if let Some(connections) = self.reactor.network.get(&node.tail) {
                 for connection in connections {
                     let new_link = node.append(connection.to_owned());
                     // println!("  {}", new_link);
-                    if connection == end_node {
-                        if successful.len() % 100 == 0 {
-                            println!("saving {}", new_link);
-                        };
-                        successful.push(new_link);
+                    if connection == &self.end_node {
+                        return Some(new_link);
                     } else {
-                        to_check.push(new_link)
+                        self.to_check.push(new_link)
                     }
                 }
             }
         }
-        successful
+        None
     }
 }
 
@@ -67,8 +86,8 @@ mod tests {
     #[test]
     fn test_count_paths() {
         let reactor: Reactor = Reactor::from_str(super_tests::sample_data());
-        let paths = reactor.iter_paths("you", "out");
-        assert_eq!(paths.len(), 5);
+        let paths = reactor.path_iter("you", "out").count();
+        assert_eq!(paths, 5);
     }
     #[test]
     fn test_parse_reactor() {
