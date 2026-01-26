@@ -29,7 +29,7 @@ pub fn count_paths_containing_nodes(
 ) -> usize {
     // enumerate_paths_containing_nodes(start_node, end_node, reactor, nodes_needed)
     // sum_iter_paths(start_node, end_node, reactor, nodes_needed)
-    count_paths_passing_through_x(start_node, end_node, reactor, nodes_needed)
+    count_paths_passing_through_nodes(start_node, end_node, reactor, nodes_needed)
 }
 pub fn sum_iter_paths(
     start_node: &str,
@@ -85,7 +85,7 @@ pub fn enumerate_paths_containing_nodes(
     matching_path_count
 }
 
-pub fn count_paths_passing_through_x(
+pub fn count_paths_passing_through_nodes(
     start_node: &str,
     end_node: &str,
     reactor: Reactor,
@@ -203,7 +203,8 @@ pub mod tests {
     #[test]
     fn test_count_paths_mathy() {
         let reactor: Reactor = Reactor::from_str(sample_data_p2());
-        let matching_path_count = count_paths_passing_through_x(SVR, OUT, reactor, vec![DAC, FFT]);
+        let matching_path_count =
+            count_paths_passing_through_nodes(SVR, OUT, reactor, vec![DAC, FFT]);
         assert_eq!(matching_path_count, 2);
     }
     #[test]
