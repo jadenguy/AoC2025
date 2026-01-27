@@ -259,6 +259,10 @@ fn run_day11() {
     );
 }
 fn run_day12() {
-    let lines = read_lines("./data/day11/part1.txt").expect("Failed to read lines from file");
+    let lines = read_lines("./data/day12/part1.txt").expect("Failed to read lines from file");
     let requirement = aoc2025::day12::Requirement::from_strings(lines);
+    println!(
+        "Day 12 Part 1: These rows will always work {}",
+        requirement.always_possible_areas().len()
+    );
 }
